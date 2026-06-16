@@ -63,7 +63,7 @@ floatingBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- ========== ТЕМЫ (БЕЗ ЦВЕТОВ) ==========
+-- ========== ТЕМЫ ==========
 local Themes = {
     Default = {
         Background = Color3.fromRGB(25, 25, 30),
@@ -146,14 +146,14 @@ local aimRadius = 150
 local itemsEspEnabled = false
 local itemsEspThread = nil
 local itemsHighlights = {}
-local itemCache = {} -- кэш для отслеживания предметов
+local itemCache = {}
 
 -- ПЕРЕМЕННЫЕ ДЛЯ ПОКАЗА ЗДОРОВЬЯ
 local healthShowEnabled = false
 local healthThread = nil
 local healthBillboards = {}
 
--- ========== АВТО БЛОК ПЕРЕМЕННЫЕ (ИЗ ВТОРОГО СКРИПТА) ==========
+-- ========== АВТО БЛОК ПЕРЕМЕННЫЕ ==========
 local autoBlockOn = false
 local autoBlockAudioOn = false
 local autoblocktype = "Block"
@@ -198,7 +198,6 @@ local AUDIO_SOUND_THROTTLE = 1.0
 local lastLocalBlockTime = 0
 
 local KillersFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Killers")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local testRemote = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Network") and ReplicatedStorage.Modules.Network:FindFirstChild("RemoteEvent")
 
 -- ========== ФУНКЦИИ ДЛЯ РАБОТЫ С REMOTE ==========
@@ -230,7 +229,7 @@ local function fireRemoteClone()
     end
 end
 
--- ========== ФУНКЦИИ АВТО БЛОКА (ИЗ ВТОРОГО СКРИПТА) ==========
+-- ========== ФУНКЦИИ АВТО БЛОКА ==========
 local function getNearestKillerModel()
     local myChar = LocalPlayer.Character
     local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
@@ -346,7 +345,6 @@ local function attemptBlockForSound(sound)
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     
-    -- предсказание позиции
     local v = hrp.Velocity or Vector3.new()
     local predictedX = hrp.Position.X + v.X * AUDIO_PREDICT_DT
     local predictedY = hrp.Position.Y + v.Y * AUDIO_PREDICT_DT
@@ -381,7 +379,7 @@ local function attemptBlockForSound(sound)
     soundBlockedUntil[sound] = now + AUDIO_SOUND_THROTTLE
 end
 
--- ОПТИМИЗИРОВАННАЯ ПОДСВЕТКА ПРЕДМЕТОВ (С КЭШЕМ)
+-- ========== ОПТИМИЗИРОВАННАЯ ПОДСВЕТКА ПРЕДМЕТОВ ==========
 local function clearItemsESP()
     for _, h in pairs(itemsHighlights) do
         pcall(function() h:Destroy() end)
@@ -411,10 +409,6 @@ local function updateItemsESP()
         return
     end
     
-    -- Используем кэш для отслеживания предметов
-    local newItemCache = {}
-    
-    -- Поиск предметов (только один раз за цикл)
     local allItems = {}
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("Model") then
@@ -424,16 +418,13 @@ local function updateItemsESP()
         end
     end
     
-    -- Удаляем подсветку для предметов, которых больше нет
     for _, h in pairs(itemsHighlights) do
         if not h or not h.Parent or not h.Parent:IsA("Model") then
             pcall(function() h:Destroy() end)
         end
     end
     
-    -- Создаем подсветку для новых предметов
     for _, obj in pairs(allItems) do
-        -- Проверяем, есть ли уже подсветка
         local hasHighlight = false
         for _, h in pairs(itemsHighlights) do
             if h and h.Parent == obj then
@@ -462,7 +453,6 @@ local function updateItemsESP()
         end
     end
     
-    -- Удаляем подсветку для предметов, которых больше нет в игре
     local toRemove = {}
     for i, h in pairs(itemsHighlights) do
         if h and h.Parent then
@@ -525,7 +515,7 @@ local TpwalkToggle = PlayerTab:CreateToggle({
 
 local TpwalkSlider = PlayerTab:CreateSlider({
     Name = "СКОРОСТЬ TPWALK",
-    Range = {5, 35},
+    Range = {5, 100},  -- ИЗМЕНЕНО: макс 100
     Increment = 1,
     Suffix = "%",
     CurrentValue = 15,
@@ -665,7 +655,7 @@ local ItemsEspToggle = VisualTab:CreateToggle({
             itemsEspThread = RunService.Heartbeat:Connect(function()
                 if itemsEspEnabled then 
                     updateItemsESP() 
-                    task.wait(0.1) -- небольшая задержка для снижения нагрузки
+                    task.wait(0.1)
                 end
             end)
         else
@@ -969,7 +959,7 @@ local AimSlider = AimTab:CreateSlider({
     end
 })
 
--- ========== НОВАЯ ВКЛАДКА: АВТО БЛОК ==========
+-- ========== ВКЛАДКА АВТО БЛОК ==========
 local AutoBlockTab = Window:CreateTab("АВТО БЛОК")
 
 -- Левая группа: основные настройки
@@ -990,7 +980,6 @@ local AutoBlockAudioToggle = AutoBlockTab:CreateToggle({
     Flag = "AutoBlockAudioToggle",
     Callback = function(Value)
         autoBlockAudioOn = Value
-        -- Активируем хуки для звуков при включении
         if Value and KillersFolder then
             for _, desc in ipairs(KillersFolder:GetDescendants()) do
                 if desc:IsA("Sound") then
@@ -1003,13 +992,20 @@ local AutoBlockAudioToggle = AutoBlockTab:CreateToggle({
     end
 })
 
+-- ИЗМЕНЕНО: русские названия для типов блока
 local BlockTypeDropdown = AutoBlockTab:CreateDropdown({
     Name = "ТИП БЛОКА",
-    Options = {"Block", "Charge", "7n7 Clone"},
-    CurrentOption = "Block",
+    Options = {"БЛОК", "ЗАРЯД", "КЛОН 007"},
+    CurrentOption = "БЛОК",
     Flag = "BlockType",
     Callback = function(Value)
-        autoblocktype = Value
+        if Value == "БЛОК" then
+            autoblocktype = "Block"
+        elseif Value == "ЗАРЯД" then
+            autoblocktype = "Charge"
+        elseif Value == "КЛОН 007" then
+            autoblocktype = "7n7 Clone"
+        end
     end
 })
 
@@ -1250,7 +1246,6 @@ local FogBtn = FunTab:CreateButton({
 -- ========== ВКЛАДКА НАСТРОЙКИ ==========
 local SettingsTab = Window:CreateTab("НАСТРОЙКИ")
 
--- ТЕМЫ (БЕЗ ЦВЕТОВ)
 local ThemeSection = SettingsTab:CreateSection("ТЕМЫ")
 
 local ThemeNya = SettingsTab:CreateButton({
@@ -1325,6 +1320,15 @@ RunService.RenderStepped:Connect(function()
     
     if not KillersFolder then return end
     
+    local blockAnims = {
+        "126830014841198", "126355327951215", "121086746534252", "18885909645",
+        "98456918873918", "105458270463374", "83829782357897", "125403313786645",
+        "118298475669935", "82113744478546", "70371667919898", "99135633258223",
+        "97167027849946", "109230267448394", "139835501033932", "126896426760253",
+        "109667959938617", "126681776859538", "129976080405072", "121293883585738",
+        "81639435858902", "137314737492715", "92173139187970", "122709416391", "879895330952"
+    }
+    
     for _, plr in ipairs(Players:GetPlayers()) do
         if plr ~= LocalPlayer and plr.Character then
             local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
@@ -1344,35 +1348,23 @@ RunService.RenderStepped:Connect(function()
             
             for _, track in ipairs(tracks) do
                 local animId = tostring(track.Animation and track.Animation.AnimationId or ""):match("%d+")
-                if animId then
-                    -- Список анимаций блока из второго скрипта
-                    local blockAnims = {
-                        "126830014841198", "126355327951215", "121086746534252", "18885909645",
-                        "98456918873918", "105458270463374", "83829782357897", "125403313786645",
-                        "118298475669935", "82113744478546", "70371667919898", "99135633258223",
-                        "97167027849946", "109230267448394", "139835501033932", "126896426760253",
-                        "109667959938617", "126681776859538", "129976080405072", "121293883585738",
-                        "81639435858902", "137314737492715", "92173139187970", "122709416391", "879895330952"
-                    }
-                    if table.find(blockAnims, animId) then
-                        task.wait(blockdelay)
-                        if autoblocktype == "Block" then
-                            fireRemoteBlock()
-                            if doubleblocktech then fireRemotePunch() end
-                        elseif autoblocktype == "Charge" then
-                            fireRemoteCharge()
-                        elseif autoblocktype == "7n7 Clone" then
-                            fireRemoteClone()
-                        end
-                        
-                        -- Отправка сообщения в чат
-                        if messageWhenAutoBlockOn and messageWhenAutoBlock ~= "" then
-                            local TextChatService = game:GetService("TextChatService")
-                            local channel = TextChatService.TextChannels.RBXGeneral
-                            pcall(function() channel:SendAsync(messageWhenAutoBlock) end)
-                        end
-                        break
+                if animId and table.find(blockAnims, animId) then
+                    task.wait(blockdelay)
+                    if autoblocktype == "Block" then
+                        fireRemoteBlock()
+                        if doubleblocktech then fireRemotePunch() end
+                    elseif autoblocktype == "Charge" then
+                        fireRemoteCharge()
+                    elseif autoblocktype == "7n7 Clone" then
+                        fireRemoteClone()
                     end
+                    
+                    if messageWhenAutoBlockOn and messageWhenAutoBlock ~= "" then
+                        local TextChatService = game:GetService("TextChatService")
+                        local channel = TextChatService.TextChannels.RBXGeneral
+                        pcall(function() channel:SendAsync(messageWhenAutoBlock) end)
+                    end
+                    break
                 end
             end
         end
@@ -1536,7 +1528,7 @@ local function attemptBDParts(sound)
     end)
 end
 
--- Хуки для звуков (включаются при включении Audio Auto Block)
+-- Хуки для звуков
 local function hookSound(sound)
     if not sound or not sound:IsA("Sound") then return end
     if soundHooks[sound] then return end
@@ -1581,7 +1573,7 @@ local function hookSound(sound)
     end
 end
 
--- Подключаем хуки для существующих звуков в KillersFolder
+-- Подключаем хуки для существующих звуков
 task.spawn(function()
     while not KillersFolder do
         task.wait(0.5)
@@ -1638,7 +1630,6 @@ local _hitboxDraggingDebounce = false
 local Dspeed = 5.6
 local Ddelay = 0
 local HITBOX_DETECT_RADIUS = 6
-local HITBOX_DRAG_DURATION = 1.4
 
 local function getKillerHRP(killerModel)
     if not killerModel then return nil end
