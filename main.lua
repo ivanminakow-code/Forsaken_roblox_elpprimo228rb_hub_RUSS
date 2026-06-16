@@ -1,4 +1,4 @@
--- FORSAKEN BY ELPRIMO228RB - С ПРОКРУТКОЙ
+-- FORSAKEN BY ELPRIMO228RB - ИСПРАВЛЕННЫЙ ESP
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -145,7 +145,7 @@ local btnAimbot = createTabButton("АИМБОТ", 0.498)
 local btnFun = createTabButton("РАЗВЛЕЧ.", 0.664)
 local btnSettings = createTabButton("НАСТРОЙКИ", 0.83)
 
--- ФУНКЦИЯ ПРОКРУЧИВАЕМОЙ ВКЛАДКИ (СКРОЛЛ)
+-- ФУНКЦИЯ ПРОКРУЧИВАЕМОЙ ВКЛАДКИ
 local function createScrollableTab()
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, 0, 1, -(titleHeight + tabHeight + 5))
@@ -303,7 +303,7 @@ playerScroll.CanvasSize = UDim2.new(0, 0, 0, yOffsetP + 20)
 playerContainer.Parent = frame
 playerContainer.Visible = true
 
--- ========== ВКЛАДКА ВИЗУАЛ (ESP) ==========
+-- ========== ВКЛАДКА ВИЗУАЛ (ESP БЕЗ МИГАНИЯ) ==========
 local visualContainer, visualScroll, visualContent = createScrollableTab()
 local yOffsetV = 8
 
@@ -319,6 +319,7 @@ local function clearESP()
 end
 
 local function createHighlight(obj, outlineColor, fillColor)
+    -- Удаляем старые хайлайты на объекте
     for _, h in pairs(obj:GetChildren()) do
         if h:IsA("Highlight") then h:Destroy() end
     end
@@ -339,8 +340,7 @@ local function updateESP()
         return
     end
     
-    clearESP()
-    
+    -- НЕ УДАЛЯЕМ ВСЕ ХАЙЛАЙТЫ, А ТОЛЬКО ОБНОВЛЯЕМ
     local playersFolder = workspace:FindFirstChild("Players")
     if playersFolder then
         local killers = playersFolder:FindFirstChild("Killers")
@@ -349,7 +349,14 @@ local function updateESP()
                 if obj:IsA("Model") then
                     local hum = obj:FindFirstChildOfClass("Humanoid")
                     if hum and obj:FindFirstChild("HumanoidRootPart") and hum.Health > 0 then
-                        createHighlight(obj, Color3.new(1, 0, 0), Color3.new(1, 0.5, 0.5))
+                        -- Проверяем, есть ли уже хайлайт
+                        local hasHighlight = false
+                        for _, h in pairs(obj:GetChildren()) do
+                            if h:IsA("Highlight") then hasHighlight = true end
+                        end
+                        if not hasHighlight then
+                            createHighlight(obj, Color3.new(1, 0, 0), Color3.new(1, 0.5, 0.5))
+                        end
                     end
                 end
             end
@@ -361,13 +368,20 @@ local function updateESP()
                 if obj:IsA("Model") then
                     local hum = obj:FindFirstChildOfClass("Humanoid")
                     if hum and obj:FindFirstChild("HumanoidRootPart") and hum.Health > 0 then
-                        createHighlight(obj, Color3.new(0, 1, 0), Color3.new(0.5, 1, 0.5))
+                        local hasHighlight = false
+                        for _, h in pairs(obj:GetChildren()) do
+                            if h:IsA("Highlight") then hasHighlight = true end
+                        end
+                        if not hasHighlight then
+                            createHighlight(obj, Color3.new(0, 1, 0), Color3.new(0.5, 1, 0.5))
+                        end
                     end
                 end
             end
         end
     end
     
+    -- Генераторы
     local map = workspace:FindFirstChild("Map")
     if map then
         local ingame = map:FindFirstChild("Ingame")
@@ -376,7 +390,13 @@ local function updateESP()
             if m then
                 for _, obj in pairs(m:GetChildren()) do
                     if obj:IsA("Model") and obj.Name == "Generator" then
-                        createHighlight(obj, Color3.new(1, 1, 0), Color3.new(1, 1, 0.5))
+                        local hasHighlight = false
+                        for _, h in pairs(obj:GetChildren()) do
+                            if h:IsA("Highlight") then hasHighlight = true end
+                        end
+                        if not hasHighlight then
+                            createHighlight(obj, Color3.new(1, 1, 0), Color3.new(1, 1, 0.5))
+                        end
                     end
                 end
             end
@@ -649,4 +669,4 @@ btnSettings.MouseButton1Click:Connect(function() setActiveTab(btnSettings) end)
 setActiveTab(btnPlayer)
 
 print("FORSAKEN BY ELPRIMO228RB - ЗАПУЩЕН")
-print("КНОПКИ МОЖНО ЛИСТАТЬ ВО ВСЕХ ВКЛАДКАХ")
+print("ESP БОЛЬШЕ НЕ МИГАЕТ - ЦВЕТА ФИКСИРОВАНЫ")
