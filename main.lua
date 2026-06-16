@@ -1,4 +1,4 @@
--- FORSAKEN BY ELPRIMO228RB - ИСПРАВЛЕННЫЙ ESP
+-- FORSAKEN BY ELPRIMO228RB - RAYFIELD GUI (С РАБОЧИМИ ТЕМАМИ)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -6,310 +6,213 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
-local screenSize = workspace.CurrentCamera.ViewportSize
-local buttonHeight = 38
-local fontSize = 13
-local titleHeight = 50
-local tabHeight = 45
-local spacing = 4
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "FORSAKEN_ELPRIMO228RB"
-gui.ResetOnSpawn = false
+-- ПЛАВАЮЩАЯ КНОПКА ДЛЯ ТЕЛЕФОНА
+local floatingBtn = Instance.new("ImageButton")
+floatingBtn.Size = UDim2.new(0, 60, 0, 60)
+floatingBtn.Position = UDim2.new(0.85, 0, 0.85, 0)
+floatingBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+floatingBtn.BackgroundTransparency = 0.15
+floatingBtn.Image = "rbxassetid://7641916668"
+floatingBtn.ScaleType = Enum.ScaleType.Fit
+floatingBtn.Parent = game:GetService("CoreGui")
+floatingBtn.ZIndex = 1000
 
-pcall(function()
-    if syn then
-        gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-    else
-        gui.Parent = game:GetService("CoreGui")
-    end
-end)
-if not gui.Parent then
-    gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-end
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(1, 0)
+btnCorner.Parent = floatingBtn
 
--- ПЛАВАЮЩАЯ КНОПКА
-local floatingButton = Instance.new("ImageButton")
-floatingButton.Size = UDim2.new(0, 55, 0, 55)
-floatingButton.Position = UDim2.new(0.85, 0, 0.85, 0)
-floatingButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-floatingButton.BackgroundTransparency = 0.15
-floatingButton.Image = "rbxassetid://7641916668"
-floatingButton.ScaleType = Enum.ScaleType.Fit
-floatingButton.Parent = gui
-
-local buttonCorner = Instance.new("UICorner")
-buttonCorner.CornerRadius = UDim.new(1, 0)
-buttonCorner.Parent = floatingButton
-
+-- ПЕРЕТАСКИВАНИЕ ПЛАВАЮЩЕЙ КНОПКИ
 local dragActive = false
 local dragStart = Vector2.new()
 local dragStartPos = UDim2.new()
-floatingButton.InputBegan:Connect(function(input)
+
+floatingBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragActive = true
         dragStart = input.Position
-        dragStartPos = floatingButton.Position
+        dragStartPos = floatingBtn.Position
     end
 end)
+
 UserInputService.InputChanged:Connect(function(input)
     if dragActive and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
         local delta = input.Position - dragStart
-        local scrSize = gui.AbsoluteSize
-        local btnSize = floatingButton.AbsoluteSize
-        floatingButton.Position = UDim2.new(0, math.clamp(dragStartPos.X.Offset + delta.X, 0, scrSize.X - btnSize.X), 0, math.clamp(dragStartPos.Y.Offset + delta.Y, 0, scrSize.Y - btnSize.Y))
+        local scrSize = game:GetService("CoreGui").AbsoluteSize
+        local btnSize = floatingBtn.AbsoluteSize
+        floatingBtn.Position = UDim2.new(0, math.clamp(dragStartPos.X.Offset + delta.X, 0, scrSize.X - btnSize.X), 0, math.clamp(dragStartPos.Y.Offset + delta.Y, 0, scrSize.Y - btnSize.Y))
     end
 end)
+
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragActive = false
     end
 end)
 
--- ОСНОВНОЕ ОКНО
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(1, 0, 1, 0)
-frame.Position = UDim2.new(0, 0, 0, 0)
-frame.BackgroundColor3 = Color3.fromRGB(18, 18, 25)
-frame.BackgroundTransparency = 0.05
-frame.ClipsDescendants = true
-frame.Visible = true
-frame.Parent = gui
+-- ОТКРЫТИЕ/ЗАКРЫТИЕ ОКНА
+local windowVisible = true
 
--- ЗАГОЛОВОК
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, titleHeight)
-titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
-titleBar.BackgroundTransparency = 0.15
-titleBar.Parent = frame
-
-local titleText = Instance.new("TextLabel")
-titleText.Size = UDim2.new(1, -80, 1, 0)
-titleText.Position = UDim2.new(0, 15, 0, 0)
-titleText.BackgroundTransparency = 1
-titleText.Text = "FORSAKEN BY ELPRIMO228RB"
-titleText.TextColor3 = Color3.fromRGB(0, 162, 255)
-titleText.TextScaled = true
-titleText.Font = Enum.Font.GothamBold
-titleText.TextXAlignment = Enum.TextXAlignment.Left
-titleText.Parent = titleBar
-
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 42, 0, 42)
-closeBtn.Position = UDim2.new(1, -52, 0, 4)
-closeBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
-closeBtn.BackgroundTransparency = 0.3
-closeBtn.Text = "✖"
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.TextScaled = true
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.BorderSizePixel = 0
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(1, 0)
-closeCorner.Parent = closeBtn
-closeBtn.Parent = titleBar
-
-closeBtn.MouseButton1Click:Connect(function()
-    frame.Visible = false
-end)
-
-floatingButton.MouseButton1Click:Connect(function()
-    frame.Visible = not frame.Visible
-end)
-
--- ПАНЕЛЬ ВКЛАДОК
-local tabsFrame = Instance.new("Frame")
-tabsFrame.Size = UDim2.new(1, 0, 0, tabHeight)
-tabsFrame.Position = UDim2.new(0, 0, 0, titleHeight)
-tabsFrame.BackgroundTransparency = 1
-tabsFrame.Parent = frame
-
-local function createTabButton(name, position)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.166, 0, 1, 0)
-    btn.Position = UDim2.new(position, 0, 0, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
-    btn.Text = name
-    btn.TextColor3 = Color3.fromRGB(210, 210, 250)
-    btn.TextScaled = true
-    btn.Font = Enum.Font.GothamBold
-    btn.BorderSizePixel = 0
-    btn.Parent = tabsFrame
-    return btn
-end
-
-local btnPlayer = createTabButton("ИГРОК", 0)
-local btnVisual = createTabButton("ВИЗУАЛ", 0.166)
-local btnGenerators = createTabButton("ГЕНЕРАТ.", 0.332)
-local btnAimbot = createTabButton("АИМБОТ", 0.498)
-local btnFun = createTabButton("РАЗВЛЕЧ.", 0.664)
-local btnSettings = createTabButton("НАСТРОЙКИ", 0.83)
-
--- ФУНКЦИЯ ПРОКРУЧИВАЕМОЙ ВКЛАДКИ
-local function createScrollableTab()
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, 0, 1, -(titleHeight + tabHeight + 5))
-    container.Position = UDim2.new(0, 0, 0, titleHeight + tabHeight + 5)
-    container.BackgroundTransparency = 1
-    container.ClipsDescendants = true
-    container.Parent = frame
-    
-    local scrollingFrame = Instance.new("ScrollingFrame")
-    scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
-    scrollingFrame.BackgroundTransparency = 1
-    scrollingFrame.BorderSizePixel = 0
-    scrollingFrame.ScrollBarThickness = 6
-    scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 120)
-    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-    scrollingFrame.ScrollBarImageTransparency = 0.5
-    scrollingFrame.Parent = container
-    
-    local content = Instance.new("Frame")
-    content.Size = UDim2.new(1, 0, 0, 0)
-    content.BackgroundTransparency = 1
-    content.Parent = scrollingFrame
-    
-    return container, scrollingFrame, content
-end
-
-local function createButton(parent, text, yOffset, color)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, screenSize.X - 40, 0, buttonHeight)
-    btn.Position = UDim2.new(0.5, -(screenSize.X - 40) / 2, 0, yOffset)
-    btn.BackgroundColor3 = color or Color3.fromRGB(45, 45, 58)
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = fontSize
-    btn.Font = Enum.Font.GothamBold
-    btn.BorderSizePixel = 0
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = btn
-    btn.Parent = parent
-    return btn
-end
-
-local function createSlider(parent, yOffset, labelText, minValue, maxValue, defaultValue, callback)
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0, screenSize.X - 40, 0, 22)
-    label.Position = UDim2.new(0.5, -(screenSize.X - 40) / 2, 0, yOffset)
-    label.BackgroundTransparency = 1
-    label.Text = labelText .. ": " .. tostring(defaultValue)
-    label.TextColor3 = Color3.fromRGB(200, 200, 255)
-    label.TextSize = fontSize - 1
-    label.Font = Enum.Font.Gotham
-    label.TextXAlignment = Enum.TextXAlignment.Center
-    label.Parent = parent
-    
-    local track = Instance.new("Frame")
-    track.Size = UDim2.new(0, screenSize.X - 40, 0, 5)
-    track.Position = UDim2.new(0.5, -(screenSize.X - 40) / 2, 0, yOffset + 22)
-    track.BackgroundColor3 = Color3.fromRGB(55, 55, 70)
-    track.Parent = parent
-    
-    local fill = Instance.new("Frame")
-    local perc = (defaultValue - minValue) / (maxValue - minValue)
-    fill.Size = UDim2.new(perc, 0, 1, 0)
-    fill.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
-    fill.Parent = track
-    
-    local knob = Instance.new("Frame")
-    knob.Size = UDim2.new(0, 16, 0, 16)
-    knob.Position = UDim2.new(perc, -8, 0.5, -8)
-    knob.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
-    knob.Parent = track
-    
-    local dragging = false
-    local function updateValue(inputPos)
-        local tPos = track.AbsolutePosition.X
-        local tWid = track.AbsoluteSize.X
-        if tWid <= 0 then return end
-        local p = math.clamp((inputPos - tPos) / tWid, 0, 1)
-        local val = math.floor(minValue + p * (maxValue - minValue))
-        label.Text = labelText .. ": " .. tostring(val)
-        fill.Size = UDim2.new(p, 0, 1, 0)
-        knob.Position = UDim2.new(p, -8, 0.5, -8)
-        callback(val)
+floatingBtn.MouseButton1Click:Connect(function()
+    windowVisible = not windowVisible
+    if windowVisible then
+        Rayfield:ToggleVisibility(true)
+    else
+        Rayfield:ToggleVisibility(false)
     end
-    
-    track.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            updateValue(input.Position.X)
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-            updateValue(input.Position.X)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
+end)
+
+-- ========== ТЕМЫ (РАБОЧИЕ) ==========
+local function applyTheme(themeType)
+    if themeType == "Nya" then
+        -- РОЗОВАЯ ТЕМА
+        pcall(function()
+            -- Меняем стиль Rayfield
+            Rayfield:ModifyTheme("Default")
+            -- Меняем плавающую кнопку
+            floatingBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 180)
+            floatingBtn.Image = "rbxassetid://7641916668"
+            -- Меняем фон окна через стили (если есть)
+            Rayfield:SetWindowName("🌸 NYA BY ELPRIMO228RB 🌸")
+        end)
+        Rayfield:Notify({
+            Title = "🌸 ТЕМА СМЕНЕНА",
+            Content = "НЯШНЫЙ РЕЖИМ АКТИВИРОВАН!",
+            Duration = 2,
+            Image = 0
+        })
+    elseif themeType == "Lava" then
+        -- ЛАВОВАЯ ТЕМА (как в Bobby Hub)
+        pcall(function()
+            Rayfield:ModifyTheme("AmberGlow")
+            floatingBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+            floatingBtn.Image = "rbxassetid://7641916668"
+            Rayfield:SetWindowName("🔥 LAVA BY ELPRIMO228RB 🔥")
+        end)
+        Rayfield:Notify({
+            Title = "🔥 ТЕМА СМЕНЕНА",
+            Content = "ЛАВОВЫЙ РЕЖИМ АКТИВИРОВАН!",
+            Duration = 2,
+            Image = 0
+        })
+    else
+        -- СТАНДАРТНАЯ ТЕМА
+        pcall(function()
+            Rayfield:ModifyTheme("Default")
+            floatingBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+            floatingBtn.Image = "rbxassetid://7641916668"
+            Rayfield:SetWindowName("FORSAKEN BY ELPRIMO228RB")
+        end)
+        Rayfield:Notify({
+            Title = "💠 ТЕМА СМЕНЕНА",
+            Content = "СТАНДАРТНАЯ ТЕМА АКТИВИРОВАНА",
+            Duration = 2,
+            Image = 0
+        })
+    end
 end
 
--- ========== TPWALK ==========
+local Window = Rayfield:CreateWindow({
+    Name = "FORSAKEN BY ELPRIMO228RB",
+    LoadingTitle = "FORSAKEN ELPRIMO228RB",
+    LoadingSubtitle = "by ELPRIMO228RB",
+    ConfigurationSaving = {
+       Enabled = true,
+       FolderName = "ELPRIMO228RB_HUB",
+       FileName = "Settings"
+    },
+    Discord = {
+       Enabled = false,
+       Invite = "noinvitelink",
+       RememberJoins = true
+    },
+    KeySystem = false,
+    KeySettings = {
+       Title = "Key System",
+       Subtitle = "Key System",
+       Note = "No key required",
+       FileName = "Key",
+       SaveKey = true,
+       GrabKeyFromSite = false,
+       Key = {"key"}
+    }
+})
+
+-- ========== ПЕРЕМЕННЫЕ ==========
 local tpwalkActive = false
 local tpwalkConn = nil
 local tpwalkSpeed = 0.15
 
-local function startTpwalk()
-    if tpwalkConn then tpwalkConn:Disconnect() end
-    tpwalkConn = RunService.RenderStepped:Connect(function()
-        if not tpwalkActive then return end
-        local char = LocalPlayer.Character
-        if not char then return end
-        local hum = char:FindFirstChild("Humanoid")
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hum or not hrp then return end
-        local dir = hum.MoveDirection
-        if dir.Magnitude > 0 then
-            hrp.CFrame = hrp.CFrame + (dir * tpwalkSpeed)
-        end
-    end)
-end
-
--- ========== ВКЛАДКА ИГРОК ==========
-local playerContainer, playerScroll, playerContent = createScrollableTab()
-local yOffsetP = 8
-
-local tpwalkBtn = createButton(playerContent, "TPWALK: ВЫКЛ", yOffsetP, Color3.fromRGB(0, 120, 200))
-tpwalkBtn.MouseButton1Click:Connect(function()
-    tpwalkActive = not tpwalkActive
-    if tpwalkActive then
-        startTpwalk()
-        tpwalkBtn.Text = "TPWALK: ВКЛ"
-        tpwalkBtn.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-    else
-        if tpwalkConn then tpwalkConn:Disconnect() end
-        tpwalkBtn.Text = "TPWALK: ВЫКЛ"
-        tpwalkBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
-    end
-end)
-yOffsetP = yOffsetP + buttonHeight + spacing
-
-local tpwalkSlider = createSlider(playerContent, yOffsetP, "СКОРОСТЬ TPWALK", 5, 35, 15, function(value)
-    tpwalkSpeed = value / 100
-    if tpwalkActive then
-        startTpwalk()
-    end
-end)
-yOffsetP = yOffsetP + 50
-
-playerContent.Size = UDim2.new(1, 0, 0, yOffsetP + 20)
-playerScroll.CanvasSize = UDim2.new(0, 0, 0, yOffsetP + 20)
-playerContainer.Parent = frame
-playerContainer.Visible = true
-
--- ========== ВКЛАДКА ВИЗУАЛ (ESP БЕЗ МИГАНИЯ) ==========
-local visualContainer, visualScroll, visualContent = createScrollableTab()
-local yOffsetV = 8
-
 local espEnabled = false
 local espThread = nil
 local espHighlights = {}
+
+local autoGenEnabled = false
+local autoGenLoop = nil
+
+local aimEnabled = false
+local aimConn = nil
+local aimRadius = 150
+
+-- ПЕРЕМЕННЫЕ ДЛЯ ПОДСВЕТКИ ПРЕДМЕТОВ
+local itemsEspEnabled = false
+local itemsEspThread = nil
+local itemsHighlights = {}
+
+-- ПЕРЕМЕННЫЕ ДЛЯ ПОКАЗА ЗДОРОВЬЯ
+local healthShowEnabled = false
+local healthThread = nil
+local healthBillboards = {}
+
+-- ========== ВКЛАДКА ИГРОК ==========
+local PlayerTab = Window:CreateTab("ИГРОК")
+
+local PlayerSection = PlayerTab:CreateSection("TPWALK")
+
+local TpwalkToggle = PlayerTab:CreateToggle({
+    Name = "TPWALK",
+    CurrentValue = false,
+    Flag = "TpwalkToggle",
+    Callback = function(Value)
+        tpwalkActive = Value
+        if tpwalkActive then
+            if tpwalkConn then tpwalkConn:Disconnect() end
+            tpwalkConn = RunService.RenderStepped:Connect(function()
+                if not tpwalkActive then return end
+                local char = LocalPlayer.Character
+                if not char then return end
+                local hum = char:FindFirstChild("Humanoid")
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if not hum or not hrp then return end
+                local dir = hum.MoveDirection
+                if dir.Magnitude > 0 then
+                    hrp.CFrame = hrp.CFrame + (dir * tpwalkSpeed)
+                end
+            end)
+        else
+            if tpwalkConn then tpwalkConn:Disconnect() end
+            tpwalkConn = nil
+        end
+    end
+})
+
+local TpwalkSlider = PlayerTab:CreateSlider({
+    Name = "СКОРОСТЬ TPWALK",
+    Range = {5, 35},
+    Increment = 1,
+    Suffix = "%",
+    CurrentValue = 15,
+    Flag = "TpwalkSpeed",
+    Callback = function(Value)
+        tpwalkSpeed = Value / 100
+    end
+})
+
+-- ========== ВКЛАДКА ВИЗУАЛ ==========
+local VisualTab = Window:CreateTab("ВИЗУАЛ")
+
+local VisualSection = VisualTab:CreateSection("ESP ИГРОКОВ")
 
 local function clearESP()
     for _, h in pairs(espHighlights) do
@@ -319,7 +222,6 @@ local function clearESP()
 end
 
 local function createHighlight(obj, outlineColor, fillColor)
-    -- Удаляем старые хайлайты на объекте
     for _, h in pairs(obj:GetChildren()) do
         if h:IsA("Highlight") then h:Destroy() end
     end
@@ -340,7 +242,8 @@ local function updateESP()
         return
     end
     
-    -- НЕ УДАЛЯЕМ ВСЕ ХАЙЛАЙТЫ, А ТОЛЬКО ОБНОВЛЯЕМ
+    clearESP()
+    
     local playersFolder = workspace:FindFirstChild("Players")
     if playersFolder then
         local killers = playersFolder:FindFirstChild("Killers")
@@ -349,7 +252,6 @@ local function updateESP()
                 if obj:IsA("Model") then
                     local hum = obj:FindFirstChildOfClass("Humanoid")
                     if hum and obj:FindFirstChild("HumanoidRootPart") and hum.Health > 0 then
-                        -- Проверяем, есть ли уже хайлайт
                         local hasHighlight = false
                         for _, h in pairs(obj:GetChildren()) do
                             if h:IsA("Highlight") then hasHighlight = true end
@@ -381,7 +283,6 @@ local function updateESP()
         end
     end
     
-    -- Генераторы
     local map = workspace:FindFirstChild("Map")
     if map then
         local ingame = map:FindFirstChild("Ingame")
@@ -404,37 +305,238 @@ local function updateESP()
     end
 end
 
-local espBtn = createButton(visualContent, "ESP: ВЫКЛ", yOffsetV, Color3.fromRGB(0, 120, 200))
-espBtn.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    if espEnabled then
-        updateESP()
-        if espThread then espThread:Disconnect() end
-        espThread = RunService.Heartbeat:Connect(function()
-            if espEnabled then updateESP() end
-        end)
-        espBtn.Text = "ESP: ВКЛ"
-        espBtn.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-    else
-        if espThread then espThread:Disconnect() end
-        clearESP()
-        espBtn.Text = "ESP: ВЫКЛ"
-        espBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+local EspToggle = VisualTab:CreateToggle({
+    Name = "ESP ИГРОКОВ",
+    CurrentValue = false,
+    Flag = "EspToggle",
+    Callback = function(Value)
+        espEnabled = Value
+        if espEnabled then
+            updateESP()
+            if espThread then espThread:Disconnect() end
+            espThread = RunService.Heartbeat:Connect(function()
+                if espEnabled then updateESP() end
+            end)
+        else
+            if espThread then espThread:Disconnect() end
+            clearESP()
+        end
     end
-end)
-yOffsetV = yOffsetV + buttonHeight + spacing + 20
+})
 
-visualContent.Size = UDim2.new(1, 0, 0, yOffsetV)
-visualScroll.CanvasSize = UDim2.new(0, 0, 0, yOffsetV)
-visualContainer.Parent = frame
-visualContainer.Visible = false
+-- ========== ПОДСВЕТКА ПРЕДМЕТОВ ==========
+local ItemsSection = VisualTab:CreateSection("ПОДСВЕТКА ПРЕДМЕТОВ")
+
+local function clearItemsESP()
+    for _, h in pairs(itemsHighlights) do
+        pcall(function() h:Destroy() end)
+    end
+    itemsHighlights = {}
+end
+
+local function createItemHighlight(obj, outlineColor, fillColor)
+    for _, h in pairs(obj:GetChildren()) do
+        if h:IsA("Highlight") then h:Destroy() end
+    end
+    local h = Instance.new("Highlight")
+    h.Parent = obj
+    h.Adornee = obj
+    h.FillTransparency = 0.75
+    h.FillColor = fillColor
+    h.OutlineColor = outlineColor
+    h.OutlineTransparency = 0
+    table.insert(itemsHighlights, h)
+    return h
+end
+
+local function updateItemsESP()
+    if not itemsEspEnabled then
+        clearItemsESP()
+        return
+    end
+    
+    clearItemsESP()
+    
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") then
+            if obj.Name == "BloxyCola" then
+                createItemHighlight(obj, Color3.fromRGB(204, 153, 0), Color3.fromRGB(204, 153, 0))
+            elseif obj.Name == "Medkit" then
+                createItemHighlight(obj, Color3.fromRGB(128, 0, 128), Color3.fromRGB(128, 0, 128))
+            elseif obj.Name == "SubspaceTripmine" then
+                local wp = workspace:FindFirstChild("Players")
+                local isSurvivorPlaced = false
+                if wp then
+                    local survivors = wp:FindFirstChild("Survivors")
+                    if survivors and obj:IsDescendantOf(survivors) then
+                        isSurvivorPlaced = true
+                    end
+                end
+                if not isSurvivorPlaced then
+                    createItemHighlight(obj, Color3.fromRGB(0, 191, 255), Color3.fromRGB(0, 191, 255))
+                end
+            end
+        end
+    end
+end
+
+local ItemsEspToggle = VisualTab:CreateToggle({
+    Name = "ПОДСВЕТКА ПРЕДМЕТОВ",
+    CurrentValue = false,
+    Flag = "ItemsEspToggle",
+    Callback = function(Value)
+        itemsEspEnabled = Value
+        if itemsEspEnabled then
+            updateItemsESP()
+            if itemsEspThread then itemsEspThread:Disconnect() end
+            itemsEspThread = RunService.Heartbeat:Connect(function()
+                if itemsEspEnabled then updateItemsESP() end
+            end)
+        else
+            if itemsEspThread then itemsEspThread:Disconnect() end
+            clearItemsESP()
+        end
+    end
+})
+
+-- ========== ПОКАЗ ЗДОРОВЬЯ ==========
+local HealthSection = VisualTab:CreateSection("ПОКАЗ ЗДОРОВЬЯ")
+
+local function clearHealthBillboards()
+    for _, billboard in pairs(healthBillboards) do
+        pcall(function() billboard:Destroy() end)
+    end
+    healthBillboards = {}
+end
+
+local function createHealthBillboard(player)
+    local char = player.Character
+    if not char then return end
+    
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+    
+    for _, b in pairs(healthBillboards) do
+        if b and b.Parent == head then
+            return b
+        end
+    end
+    
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "HealthESP"
+    billboard.Size = UDim2.new(0, 100, 0, 60)
+    billboard.AlwaysOnTop = true
+    billboard.MaxDistance = math.huge
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.Parent = head
+    
+    local healthLabel = Instance.new("TextLabel")
+    healthLabel.Name = "HealthLabel"
+    healthLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    healthLabel.Position = UDim2.new(0, 0, 0.5, 0)
+    healthLabel.BackgroundTransparency = 1
+    healthLabel.TextScaled = true
+    healthLabel.Font = Enum.Font.Antique
+    healthLabel.Text = ""
+    healthLabel.Parent = billboard
+    
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Name = "NameLabel"
+    nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    nameLabel.Position = UDim2.new(0, 0, 0, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.TextScaled = true
+    nameLabel.Font = Enum.Font.Antique
+    nameLabel.Text = player.Name
+    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nameLabel.Parent = billboard
+    
+    table.insert(healthBillboards, billboard)
+    return billboard
+end
+
+local function updateHealthBillboards()
+    if not healthShowEnabled then
+        clearHealthBillboards()
+        return
+    end
+    
+    local toRemove = {}
+    for i, billboard in pairs(healthBillboards) do
+        if not billboard or not billboard.Parent then
+            table.insert(toRemove, i)
+        end
+    end
+    for i = #toRemove, 1, -1 do
+        local idx = toRemove[i]
+        pcall(function() healthBillboards[idx]:Destroy() end)
+        table.remove(healthBillboards, idx)
+    end
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local char = player.Character
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local head = char:FindFirstChild("Head")
+            if hum and head then
+                local billboard = createHealthBillboard(player)
+                if billboard then
+                    local healthLabel = billboard:FindFirstChild("HealthLabel")
+                    if healthLabel then
+                        local health = math.floor(hum.Health)
+                        local maxHealth = math.floor(hum.MaxHealth)
+                        healthLabel.Text = health .. "/" .. maxHealth
+                        local percent = hum.Health / hum.MaxHealth
+                        if percent > 0.5 then
+                            healthLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                        elseif percent > 0.25 then
+                            healthLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+                        else
+                            healthLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+                        end
+                    end
+                    local nameLabel = billboard:FindFirstChild("NameLabel")
+                    if nameLabel then
+                        local wp = workspace:FindFirstChild("Players")
+                        if wp then
+                            if wp:FindFirstChild("Killers") and char:IsDescendantOf(wp.Killers) then
+                                nameLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+                            elseif wp:FindFirstChild("Survivors") and char:IsDescendantOf(wp.Survivors) then
+                                nameLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                            else
+                                nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+local HealthToggle = VisualTab:CreateToggle({
+    Name = "ПОКАЗ ЗДОРОВЬЯ",
+    CurrentValue = false,
+    Flag = "HealthToggle",
+    Callback = function(Value)
+        healthShowEnabled = Value
+        if healthShowEnabled then
+            updateHealthBillboards()
+            if healthThread then healthThread:Disconnect() end
+            healthThread = RunService.Heartbeat:Connect(function()
+                if healthShowEnabled then updateHealthBillboards() end
+            end)
+        else
+            if healthThread then healthThread:Disconnect() end
+            clearHealthBillboards()
+        end
+    end
+})
 
 -- ========== ВКЛАДКА ГЕНЕРАТОРЫ ==========
-local genContainer, genScroll, genContent = createScrollableTab()
-local yOffsetG = 8
+local GenTab = Window:CreateTab("ГЕНЕРАТОРЫ")
 
-local autoGenEnabled = false
-local autoGenLoop = nil
+local GenSection = GenTab:CreateSection("АВТО-ЧИНКА")
 
 local function fixGens()
     pcall(function()
@@ -461,38 +563,31 @@ local function fixGens()
     end)
 end
 
-local autoGenBtn = createButton(genContent, "АВТО-ЧИНКА: ВЫКЛ", yOffsetG, Color3.fromRGB(0, 120, 200))
-autoGenBtn.MouseButton1Click:Connect(function()
-    autoGenEnabled = not autoGenEnabled
-    if autoGenEnabled then
-        autoGenLoop = spawn(function()
-            while autoGenEnabled do
-                fixGens()
-                wait(2.5)
-            end
-        end)
-        autoGenBtn.Text = "АВТО-ЧИНКА: ВКЛ"
-        autoGenBtn.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-    else
-        if autoGenLoop then task.cancel(autoGenLoop) end
-        autoGenBtn.Text = "АВТО-ЧИНКА: ВЫКЛ"
-        autoGenBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+local AutoGenToggle = GenTab:CreateToggle({
+    Name = "АВТО-ЧИНКА ГЕНЕРАТОРОВ",
+    CurrentValue = false,
+    Flag = "AutoGenToggle",
+    Callback = function(Value)
+        autoGenEnabled = Value
+        if autoGenEnabled then
+            if autoGenLoop then task.cancel(autoGenLoop) end
+            autoGenLoop = spawn(function()
+                while autoGenEnabled do
+                    fixGens()
+                    wait(2.5)
+                end
+            end)
+        else
+            if autoGenLoop then task.cancel(autoGenLoop) end
+            autoGenLoop = nil
+        end
     end
-end)
-yOffsetG = yOffsetG + buttonHeight + spacing + 20
-
-genContent.Size = UDim2.new(1, 0, 0, yOffsetG)
-genScroll.CanvasSize = UDim2.new(0, 0, 0, yOffsetG)
-genContainer.Parent = frame
-genContainer.Visible = false
+})
 
 -- ========== ВКЛАДКА АИМБОТ ==========
-local aimContainer, aimScroll, aimContent = createScrollableTab()
-local yOffsetA = 8
+local AimTab = Window:CreateTab("АИМБОТ")
 
-local aimEnabled = false
-local aimConn = nil
-local aimRadius = 150
+local AimSection = AimTab:CreateSection("АИМБОТ")
 
 local function getMyTeam()
     local wp = workspace:FindFirstChild("Players")
@@ -570,103 +665,97 @@ local function aimFunc()
     end
 end
 
-local aimBtn = createButton(aimContent, "АИМБОТ: ВЫКЛ", yOffsetA, Color3.fromRGB(0, 120, 200))
-aimBtn.MouseButton1Click:Connect(function()
-    aimEnabled = not aimEnabled
-    if aimEnabled then
-        if aimConn then aimConn:Disconnect() end
-        aimConn = RunService.RenderStepped:Connect(aimFunc)
-        aimBtn.Text = "АИМБОТ: ВКЛ"
-        aimBtn.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-    else
-        if aimConn then aimConn:Disconnect() end
-        aimBtn.Text = "АИМБОТ: ВЫКЛ"
-        aimBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+local AimToggle = AimTab:CreateToggle({
+    Name = "АИМБОТ",
+    CurrentValue = false,
+    Flag = "AimToggle",
+    Callback = function(Value)
+        aimEnabled = Value
+        if aimEnabled then
+            if aimConn then aimConn:Disconnect() end
+            aimConn = RunService.RenderStepped:Connect(aimFunc)
+        else
+            if aimConn then aimConn:Disconnect() end
+            aimConn = nil
+        end
     end
-end)
-yOffsetA = yOffsetA + buttonHeight + spacing
+})
 
-local radiusSlider = createSlider(aimContent, yOffsetA, "РАДИУС НАВОДКИ", 50, 300, 150, function(value)
-    aimRadius = value
-end)
-yOffsetA = yOffsetA + 50 + 20
-
-aimContent.Size = UDim2.new(1, 0, 0, yOffsetA)
-aimScroll.CanvasSize = UDim2.new(0, 0, 0, yOffsetA)
-aimContainer.Parent = frame
-aimContainer.Visible = false
+local AimSlider = AimTab:CreateSlider({
+    Name = "РАДИУС НАВОДКИ",
+    Range = {50, 300},
+    Increment = 5,
+    Suffix = "Studs",
+    CurrentValue = 150,
+    Flag = "AimRadius",
+    Callback = function(Value)
+        aimRadius = Value
+    end
+})
 
 -- ========== ВКЛАДКА РАЗВЛЕЧЕНИЯ ==========
-local funContainer, funScroll, funContent = createScrollableTab()
-local yOffsetF = 8
+local FunTab = Window:CreateTab("РАЗВЛЕЧЕНИЯ")
 
-local fullbrightBtn = createButton(funContent, "ПОЛНАЯ ОСВЕЩЁННОСТЬ", yOffsetF, Color3.fromRGB(100, 150, 200))
-fullbrightBtn.MouseButton1Click:Connect(function()
-    pcall(function()
-        game.Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-        game.Lighting.Brightness = 1
-        game.Lighting.FogEnd = 1e10
-        game.Lighting.FogStart = 100000
-        game.Lighting.TimeOfDay = "12:00:00"
-        game.Lighting.Technology = Enum.Technology.Future
-    end)
-end)
-yOffsetF = yOffsetF + buttonHeight + spacing
+local FunSection = FunTab:CreateSection("СВЕТ")
 
-local fogBtn = createButton(funContent, "УБРАТЬ ТУМАН", yOffsetF, Color3.fromRGB(100, 150, 200))
-fogBtn.MouseButton1Click:Connect(function()
-    game.Lighting.FogStart = math.huge
-    game.Lighting.FogEnd = math.huge
-end)
-yOffsetF = yOffsetF + buttonHeight + spacing + 20
+local FullbrightBtn = FunTab:CreateButton({
+    Name = "ПОЛНАЯ ОСВЕЩЁННОСТЬ",
+    Callback = function()
+        pcall(function()
+            game.Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+            game.Lighting.Brightness = 1
+            game.Lighting.FogEnd = 1e10
+            game.Lighting.FogStart = 100000
+            game.Lighting.TimeOfDay = "12:00:00"
+            game.Lighting.Technology = Enum.Technology.Future
+        end)
+    end
+})
 
-funContent.Size = UDim2.new(1, 0, 0, yOffsetF)
-funScroll.CanvasSize = UDim2.new(0, 0, 0, yOffsetF)
-funContainer.Parent = frame
-funContainer.Visible = false
+local FogBtn = FunTab:CreateButton({
+    Name = "УБРАТЬ ТУМАН",
+    Callback = function()
+        game.Lighting.FogStart = math.huge
+        game.Lighting.FogEnd = math.huge
+    end
+})
 
--- ========== ВКЛАДКА НАСТРОЙКИ ==========
-local settingsContainer, settingsScroll, settingsContent = createScrollableTab()
-local yOffsetT = 8
+-- ========== ВКЛАДКА НАСТРОЙКИ С ТЕМАМИ ==========
+local SettingsTab = Window:CreateTab("НАСТРОЙКИ")
 
-local unloadBtn = createButton(settingsContent, "ВЫГРУЗИТЬ GUI", yOffsetT, Color3.fromRGB(180, 70, 70))
-unloadBtn.MouseButton1Click:Connect(function()
-    gui:Destroy()
-end)
-yOffsetT = yOffsetT + buttonHeight + spacing + 20
+local ThemeSection = SettingsTab:CreateSection("ТЕМЫ")
 
-settingsContent.Size = UDim2.new(1, 0, 0, yOffsetT)
-settingsScroll.CanvasSize = UDim2.new(0, 0, 0, yOffsetT)
-settingsContainer.Parent = frame
-settingsContainer.Visible = false
+local ThemeNya = SettingsTab:CreateButton({
+    Name = "🌸 НЯШНЫЙ (РОЗОВАЯ ТЕМА)",
+    Callback = function()
+        applyTheme("Nya")
+    end
+})
 
--- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
-local function setActiveTab(activeTab)
-    playerContainer.Visible = (activeTab == btnPlayer)
-    visualContainer.Visible = (activeTab == btnVisual)
-    genContainer.Visible = (activeTab == btnGenerators)
-    aimContainer.Visible = (activeTab == btnAimbot)
-    funContainer.Visible = (activeTab == btnFun)
-    settingsContainer.Visible = (activeTab == btnSettings)
-    
-    local colOn = Color3.fromRGB(80, 60, 110)
-    local colOff = Color3.fromRGB(30, 30, 42)
-    btnPlayer.BackgroundColor3 = (activeTab == btnPlayer) and colOn or colOff
-    btnVisual.BackgroundColor3 = (activeTab == btnVisual) and colOn or colOff
-    btnGenerators.BackgroundColor3 = (activeTab == btnGenerators) and colOn or colOff
-    btnAimbot.BackgroundColor3 = (activeTab == btnAimbot) and colOn or colOff
-    btnFun.BackgroundColor3 = (activeTab == btnFun) and colOn or colOff
-    btnSettings.BackgroundColor3 = (activeTab == btnSettings) and colOn or colOff
-end
+local ThemeLava = SettingsTab:CreateButton({
+    Name = "🔥 ЛАВОВЫЙ (LAVA THEME)",
+    Callback = function()
+        applyTheme("Lava")
+    end
+})
 
-btnPlayer.MouseButton1Click:Connect(function() setActiveTab(btnPlayer) end)
-btnVisual.MouseButton1Click:Connect(function() setActiveTab(btnVisual) end)
-btnGenerators.MouseButton1Click:Connect(function() setActiveTab(btnGenerators) end)
-btnAimbot.MouseButton1Click:Connect(function() setActiveTab(btnAimbot) end)
-btnFun.MouseButton1Click:Connect(function() setActiveTab(btnFun) end)
-btnSettings.MouseButton1Click:Connect(function() setActiveTab(btnSettings) end)
+local ThemeDefault = SettingsTab:CreateButton({
+    Name = "💠 СТАНДАРТНАЯ ТЕМА",
+    Callback = function()
+        applyTheme("Default")
+    end
+})
 
-setActiveTab(btnPlayer)
+local SettingsSection2 = SettingsTab:CreateSection("УПРАВЛЕНИЕ")
 
-print("FORSAKEN BY ELPRIMO228RB - ЗАПУЩЕН")
-print("ESP БОЛЬШЕ НЕ МИГАЕТ - ЦВЕТА ФИКСИРОВАНЫ")
+local UnloadBtn = SettingsTab:CreateButton({
+    Name = "ВЫГРУЗИТЬ GUI",
+    Callback = function()
+        Rayfield:Destroy()
+        floatingBtn:Destroy()
+    end
+})
+
+-- ПОКАЗЫВАЕМ ОКНО ПРИ ЗАПУСКЕ
+Rayfield:ToggleVisibility(true)
+print("FORSAKEN BY ELPRIMO228RB - RAYFIELD GUI С РАБОЧИМИ ТЕМАМИ")
