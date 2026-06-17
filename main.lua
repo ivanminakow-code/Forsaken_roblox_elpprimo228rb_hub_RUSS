@@ -1,13 +1,50 @@
--- FORSAKEN BY ELPRIMO228RB - RAYFIELD UI
+-- FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ И ДЕТЕКТОМ СООБЩЕНИЙ)
+-- ВЕРСИЯ С БОГЛМС (БЕЗ GOTO/GOT) - ИСПРАВЛЕНА ОШИБКА С КИРИЛЛИЦЕЙ
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
 local LocalPlayer = Players.LocalPlayer
 
 -- ========== ЗАГРУЗКА RAYFIELD ==========
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
+
+-- ========== ТЕМА AMETHYST ==========
+local AmethystTheme = {
+    TextColor = Color3.fromRGB(240, 240, 240),
+    Background = Color3.fromRGB(30, 20, 40),
+    Topbar = Color3.fromRGB(40, 25, 50),
+    Shadow = Color3.fromRGB(20, 15, 30),
+    NotificationBackground = Color3.fromRGB(35, 20, 40),
+    NotificationActionsBackground = Color3.fromRGB(240, 240, 250),
+    TabBackground = Color3.fromRGB(60, 40, 80),
+    TabStroke = Color3.fromRGB(70, 45, 90),
+    TabBackgroundSelected = Color3.fromRGB(180, 140, 200),
+    TabTextColor = Color3.fromRGB(230, 230, 240),
+    SelectedTabTextColor = Color3.fromRGB(50, 20, 50),
+    ElementBackground = Color3.fromRGB(45, 30, 60),
+    ElementBackgroundHover = Color3.fromRGB(50, 35, 70),
+    SecondaryElementBackground = Color3.fromRGB(40, 30, 55),
+    ElementStroke = Color3.fromRGB(70, 50, 85),
+    SecondaryElementStroke = Color3.fromRGB(65, 45, 80),
+    SliderBackground = Color3.fromRGB(100, 60, 150),
+    SliderProgress = Color3.fromRGB(130, 80, 180),
+    SliderStroke = Color3.fromRGB(150, 100, 200),
+    ToggleBackground = Color3.fromRGB(45, 30, 55),
+    ToggleEnabled = Color3.fromRGB(120, 60, 150),
+    ToggleDisabled = Color3.fromRGB(94, 47, 117),
+    ToggleEnabledStroke = Color3.fromRGB(140, 80, 170),
+    ToggleDisabledStroke = Color3.fromRGB(124, 71, 150),
+    ToggleEnabledOuterStroke = Color3.fromRGB(90, 40, 120),
+    ToggleDisabledOuterStroke = Color3.fromRGB(80, 50, 110),
+    DropdownSelected = Color3.fromRGB(50, 35, 70),
+    DropdownUnselected = Color3.fromRGB(35, 25, 50),
+    InputBackground = Color3.fromRGB(45, 30, 60),
+    InputStroke = Color3.fromRGB(80, 50, 110),
+    PlaceholderColor = Color3.fromRGB(178, 150, 200)
+}
 
 -- ========== СОЗДАНИЕ ОКНА ==========
 local Window = Rayfield:CreateWindow({
@@ -15,7 +52,7 @@ local Window = Rayfield:CreateWindow({
     Icon = 0,
     LoadingTitle = "FORSAKEN BY ELPRIMO228RB",
     LoadingSubtitle = "by ELPRIMO228RB",
-    Theme = "Default",
+    Theme = AmethystTheme,
     DisableRayfieldPrompts = false,
     DisableBuildWarnings = false,
     ConfigurationSaving = {
@@ -43,7 +80,7 @@ local Window = Rayfield:CreateWindow({
 -- ========== УВЕДОМЛЕНИЕ ==========
 Rayfield:Notify({
     Title = "FORSAKEN BY ELPRIMO228RB",
-    Content = "Загружено успешно!",
+    Content = "Тема Amethyst активирована!",
     Duration = 6.5,
     Image = nil,
 })
@@ -120,6 +157,28 @@ local lastLocalBlockTime = 0
 local KillersFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Killers")
 local testRemote = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Network") and ReplicatedStorage.Modules.Network:FindFirstChild("RemoteEvent")
 
+-- ========== TPHIT ПЕРЕМЕННЫЕ ==========
+local tpHitEnabled = false
+local tpHitConnection = nil
+local tpHitRadius = 50
+local tpHitDuration = 0.2
+
+-- ========== ДЕТЕКТ СООБЩЕНИЙ ==========
+local messageDetectionEnabled = false
+local detectionKeywords = {"я записываю", "записываю", "рекорд", "record", "rec"}
+local messageDetectionConnection = nil
+local kickOnDetection = true
+local detectionCooldown = 0
+local lastDetectionTime = 0
+
+-- ========== БОГЛМС ПЕРЕМЕННЫЕ (ИСПРАВЛЕНО) ==========
+local godlmcEnabled = false
+local godlmcThread = nil
+local godlmcTeleportConn = nil
+local godlmcCheckInterval = 0.5
+local teleportHeight = 1000
+local teleportInterval = 0.1
+
 -- ========== ФУНКЦИИ REMOTE ==========
 local function fireRemoteBlock()
     if testRemote then
@@ -178,6 +237,103 @@ local function toggleInfiniteStamina(state)
             staminaModule.StaminaLossDisabled = nil
             staminaModule = nil
         end
+    end
+end
+
+-- ========== ФУНКЦИИ БОГЛМС (ИСПРАВЛЕНО) ==========
+local function isLastSurvivor()
+    local survivorsFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Survivors")
+    if not survivorsFolder then return false end
+    
+    local survivorCount = 0
+    local myChar = LocalPlayer.Character
+    if not myChar then return false end
+    
+    for _, obj in pairs(survivorsFolder:GetChildren()) do
+        if obj:IsA("Model") then
+            local hum = obj:FindFirstChildOfClass("Humanoid")
+            if hum and hum.Health > 0 then
+                survivorCount = survivorCount + 1
+            end
+        end
+    end
+    
+    return survivorCount == 1
+end
+
+local function teleportUp()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    local newPos = Vector3.new(hrp.Position.X, hrp.Position.Y + teleportHeight, hrp.Position.Z)
+    hrp.CFrame = CFrame.new(newPos)
+end
+
+local function stopGodlmcTeleport()
+    if godlmcTeleportConn then
+        godlmcTeleportConn:Disconnect()
+        godlmcTeleportConn = nil
+    end
+end
+
+local function godlmcLoop()
+    while godlmcEnabled do
+        if isLastSurvivor() then
+            -- Запускаем телепортацию
+            if not godlmcTeleportConn then
+                godlmcTeleportConn = RunService.Heartbeat:Connect(function()
+                    if not godlmcEnabled then
+                        stopGodlmcTeleport()
+                        return
+                    end
+                    if not isLastSurvivor() then
+                        stopGodlmcTeleport()
+                        return
+                    end
+                    teleportUp()
+                    task.wait(teleportInterval)
+                end)
+            end
+            
+            -- Ждём пока условие изменится
+            while godlmcEnabled and isLastSurvivor() do
+                task.wait(godlmcCheckInterval)
+            end
+            
+            stopGodlmcTeleport()
+        else
+            task.wait(godlmcCheckInterval)
+        end
+    end
+end
+
+local function toggleGodlmc(state)
+    godlmcEnabled = state
+    
+    if godlmcThread then
+        task.cancel(godlmcThread)
+        godlmcThread = nil
+    end
+    
+    stopGodlmcTeleport()
+    
+    if state then
+        godlmcThread = task.spawn(godlmcLoop)
+        Rayfield:Notify({
+            Title = "👑 БОГЛМС ВКЛЮЧЕН",
+            Content = "Телепорт вверх при последнем выжившем!",
+            Duration = 3,
+            Image = nil,
+        })
+    else
+        Rayfield:Notify({
+            Title = "👑 БОГЛМС ВЫКЛЮЧЕН",
+            Content = "Режим бога отключен",
+            Duration = 3,
+            Image = nil,
+        })
     end
 end
 
@@ -671,6 +827,98 @@ local function aimFunc()
     end
 end
 
+-- ========== TPHIT ФУНКЦИИ ==========
+local function getClosestSurvivor()
+    local myChar = LocalPlayer.Character
+    if not myChar then return nil end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+    
+    local survivorsFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Survivors")
+    if not survivorsFolder then return nil end
+    
+    local closest = nil
+    local closestDist = tpHitRadius
+    
+    for _, survivor in pairs(survivorsFolder:GetChildren()) do
+        if survivor:IsA("Model") and survivor ~= myChar then
+            local hrp = survivor:FindFirstChild("HumanoidRootPart")
+            local hum = survivor:FindFirstChildOfClass("Humanoid")
+            if hrp and hum and hum.Health > 0 then
+                local dist = (hrp.Position - myRoot.Position).Magnitude
+                if dist < closestDist then
+                    closestDist = dist
+                    closest = survivor
+                end
+            end
+        end
+    end
+    return closest
+end
+
+local function tpHitAttack()
+    if not tpHitEnabled then return end
+    
+    local target = getClosestSurvivor()
+    if not target then return end
+    
+    local targetHrp = target:FindFirstChild("HumanoidRootPart")
+    if not targetHrp then return end
+    
+    local myChar = LocalPlayer.Character
+    if not myChar then return end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
+    
+    local originalCFrame = myRoot.CFrame
+    local targetPos = targetHrp.Position + (targetHrp.CFrame.LookVector * 2)
+    myRoot.CFrame = CFrame.new(targetPos, targetHrp.Position)
+    
+    task.delay(tpHitDuration, function()
+        if myRoot and myRoot.Parent then
+            myRoot.CFrame = originalCFrame
+        end
+    end)
+end
+
+-- ========== ДЕТЕКТ СООБЩЕНИЙ ==========
+local function checkMessageForKeywords(message)
+    if not messageDetectionEnabled then return end
+    if tick() - lastDetectionTime < detectionCooldown then return end
+    
+    local lowerMsg = string.lower(message)
+    for _, keyword in pairs(detectionKeywords) do
+        if string.find(lowerMsg, string.lower(keyword)) then
+            lastDetectionTime = tick()
+            
+            Rayfield:Notify({
+                Title = "⚠ ОБНАРУЖЕНО!",
+                Content = "Сообщение: " .. message,
+                Duration = 5,
+                Image = nil,
+            })
+            
+            if kickOnDetection then
+                task.spawn(function()
+                    task.wait(0.5)
+                    Rayfield:Notify({
+                        Title = "⚠ КИК",
+                        Content = "Вы были кикнуты за обнаружение!",
+                        Duration = 3,
+                        Image = nil,
+                    })
+                    task.wait(1)
+                    pcall(function()
+                        game:Shutdown()
+                        LocalPlayer:Kick("Обнаружено подозрительное сообщение!")
+                    end)
+                end)
+            end
+            break
+        end
+    end
+end
+
 -- ========== BD (BETTER DETECTION) ==========
 local function attemptBDParts(sound)
     if not antiFlickOn then return end
@@ -1057,10 +1305,10 @@ GenTab:CreateToggle({
         autoGenEnabled = Value
         if autoGenEnabled then
             if autoGenLoop then task.cancel(autoGenLoop) end
-            autoGenLoop = spawn(function()
+            autoGenLoop = task.spawn(function()
                 while autoGenEnabled do
                     fixGens()
-                    wait(2.5)
+                    task.wait(2.5)
                 end
             end)
         else
@@ -1352,8 +1600,9 @@ AutoBlockTab:CreateInput({
     end
 })
 
--- ВКЛАДКА РАЗВЛЕЧЕНИЯ
+-- ========== ВКЛАДКА РАЗВЛЕЧЕНИЯ ==========
 local FunTab = Window:CreateTab("РАЗВЛЕЧЕНИЯ", nil)
+
 local FunSection = FunTab:CreateSection("СВЕТ")
 
 FunTab:CreateButton({
@@ -1378,13 +1627,349 @@ FunTab:CreateButton({
     end
 })
 
--- ВКЛАДКА НАСТРОЙКИ
+-- ========== SLIDE BUTTON ==========
+local SlideSection = FunTab:CreateSection("ДВИЖЕНИЕ")
+
+FunTab:CreateButton({
+    Name = "СЛАЙД (ПОЕЗДКА ВПЕРЕД)",
+    Callback = function()
+        local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+        local existingGui = playerGui:FindFirstChild("SlideGui")
+        if existingGui then existingGui:Destroy() end
+        
+        local slideGui = Instance.new("ScreenGui")
+        slideGui.Name = "SlideGui"
+        slideGui.Parent = playerGui
+        slideGui.ResetOnSpawn = false
+        
+        local slideButton = Instance.new("ImageButton")
+        slideButton.Size = UDim2.new(0, 100, 0, 100)
+        slideButton.Position = UDim2.new(0.5, -50, 0.5, -50)
+        slideButton.Image = "rbxassetid://110777561976075"
+        slideButton.BackgroundTransparency = 1
+        slideButton.Parent = slideGui
+        slideButton.Draggable = true
+        
+        slideButton.MouseButton1Click:Connect(function()
+            local char = LocalPlayer.Character
+            if not char then return end
+            
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if not hrp or not humanoid then return end
+            
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://182749109"
+            local track = humanoid:LoadAnimation(anim)
+            track:Play()
+            
+            local TweenService = game:GetService("TweenService")
+            local goal = CFrame.new(0, 0, -20)
+            local tweenInfo = TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+            local tween = TweenService:Create(hrp, tweenInfo, { CFrame = hrp.CFrame * goal })
+            tween:Play()
+            tween.Completed:Connect(function()
+                pcall(function() track:Stop() end)
+            end)
+        end)
+    end
+})
+
+-- ========== TP HIT ==========
+local TPHitSection = FunTab:CreateSection("TP HIT")
+
+FunTab:CreateToggle({
+    Name = "TP HIT (ТЕЛЕПОРТ ПРИ УДАРЕ)",
+    CurrentValue = false,
+    Flag = "TPHitToggle",
+    Callback = function(Value)
+        tpHitEnabled = Value
+        if tpHitEnabled then
+            if tpHitConnection then tpHitConnection:Disconnect() end
+            tpHitConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                if gameProcessed then return end
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    task.spawn(tpHitAttack)
+                end
+            end)
+        else
+            if tpHitConnection then
+                tpHitConnection:Disconnect()
+                tpHitConnection = nil
+            end
+        end
+    end
+})
+
+FunTab:CreateSlider({
+    Name = "РАДИУС TP HIT",
+    Range = {10, 100},
+    Increment = 5,
+    Suffix = "Studs",
+    CurrentValue = 50,
+    Flag = "TPHitRadius",
+    Callback = function(Value)
+        tpHitRadius = Value
+    end
+})
+
+FunTab:CreateSlider({
+    Name = "ДЛИТЕЛЬНОСТЬ TP (сек)",
+    Range = {0.05, 1.0},
+    Increment = 0.05,
+    Suffix = "сек",
+    CurrentValue = 0.2,
+    Flag = "TPHitDuration",
+    Callback = function(Value)
+        tpHitDuration = Value
+    end
+})
+
+-- ========== ВКЛАДКА БОГЛМС (ИСПРАВЛЕНО) ==========
+local GodTab = Window:CreateTab("БОГЛМС", nil)
+local GodSection = GodTab:CreateSection("РЕЖИМ БОГА - ПОСЛЕДНИЙ ВЫЖИВШИЙ")
+
+GodTab:CreateToggle({
+    Name = "ВКЛЮЧИТЬ БОГЛМС",
+    CurrentValue = false,
+    Flag = "GodlmcToggle",
+    Callback = function(Value)
+        toggleGodlmc(Value)
+    end
+})
+
+GodTab:CreateInput({
+    Name = "ВЫСОТА ТЕЛЕПОРТА (студи)",
+    CurrentValue = "1000",
+    PlaceholderText = "1000",
+    Flag = "TeleportHeight",
+    Callback = function(Value)
+        teleportHeight = tonumber(Value) or 1000
+        if teleportHeight < 10 then teleportHeight = 10 end
+    end
+})
+
+GodTab:CreateSlider({
+    Name = "ИНТЕРВАЛ ТЕЛЕПОРТА (сек)",
+    Range = {0.05, 0.5},
+    Increment = 0.01,
+    Suffix = "сек",
+    CurrentValue = 0.1,
+    Flag = "TeleportInterval",
+    Callback = function(Value)
+        teleportInterval = Value
+    end
+})
+
+GodTab:CreateSlider({
+    Name = "ИНТЕРВАЛ ПРОВЕРКИ (сек)",
+    Range = {0.1, 2.0},
+    Increment = 0.1,
+    Suffix = "сек",
+    CurrentValue = 0.5,
+    Flag = "CheckInterval",
+    Callback = function(Value)
+        godlmcCheckInterval = Value
+    end
+})
+
+GodTab:CreateButton({
+    Name = "ТЕЛЕПОРТНУТЬСЯ ВВЕРХ (ТЕСТ)",
+    Callback = function()
+        teleportUp()
+        Rayfield:Notify({
+            Title = "🚀 ТЕЛЕПОРТ",
+            Content = "Телепорт вверх на " .. teleportHeight .. " студий",
+            Duration = 2,
+            Image = nil,
+        })
+    end
+})
+
+-- ========== ВКЛАДКА НАСТРОЙКИ ==========
 local SettingsTab = Window:CreateTab("НАСТРОЙКИ", nil)
-local SettingsSection = SettingsTab:CreateSection("УПРАВЛЕНИЕ")
+
+-- СЕКЦИЯ КОНФИГОВ
+local ConfigSection = SettingsTab:CreateSection("УПРАВЛЕНИЕ КОНФИГАМИ")
+
+SettingsTab:CreateButton({
+    Name = "СОХРАНИТЬ КОНФИГ",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "✅ КОНФИГ СОХРАНЕН",
+            Content = "Все настройки сохранены!",
+            Duration = 3,
+            Image = nil,
+        })
+        pcall(function()
+            if Rayfield.SaveConfiguration then
+                Rayfield:SaveConfiguration()
+            end
+        end)
+    end
+})
+
+SettingsTab:CreateButton({
+    Name = "ЗАГРУЗИТЬ КОНФИГ",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "🔄 КОНФИГ ЗАГРУЖЕН",
+            Content = "Настройки загружены из сохранения!",
+            Duration = 3,
+            Image = nil,
+        })
+        pcall(function()
+            if Rayfield.LoadConfiguration then
+                Rayfield:LoadConfiguration()
+            end
+        end)
+    end
+})
+
+SettingsTab:CreateButton({
+    Name = "СБРОСИТЬ НАСТРОЙКИ",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "⚠ СБРОС",
+            Content = "Настройки сброшены до стандартных!",
+            Duration = 3,
+            Image = nil,
+        })
+        pcall(function()
+            for flagName, flag in pairs(Rayfield.Flags) do
+                if flag.Type == "Toggle" then
+                    flag:Set(false)
+                elseif flag.Type == "Slider" then
+                    flag:Set(flag.Range[1] or 0)
+                elseif flag.Type == "Input" then
+                    flag:Set("")
+                elseif flag.Type == "Dropdown" then
+                    flag:Set(flag.Options[1] or "")
+                end
+            end
+        end)
+    end
+})
+
+-- СЕКЦИЯ ДЕТЕКТА СООБЩЕНИЙ
+local DetectionSection = SettingsTab:CreateSection("ДЕТЕКТ СООБЩЕНИЙ")
+
+SettingsTab:CreateToggle({
+    Name = "ВКЛЮЧИТЬ ДЕТЕКТ СООБЩЕНИЙ",
+    CurrentValue = false,
+    Flag = "MessageDetectionToggle",
+    Callback = function(Value)
+        messageDetectionEnabled = Value
+        
+        if messageDetectionEnabled then
+            if messageDetectionConnection then
+                messageDetectionConnection:Disconnect()
+                messageDetectionConnection = nil
+            end
+            
+            local success, channel = pcall(function()
+                return TextChatService.TextChannels.RBXGeneral
+            end)
+            
+            if success and channel then
+                messageDetectionConnection = channel.MessageReceived:Connect(function(messageData)
+                    local sender = messageData.From
+                    local content = messageData.Text
+                    if sender and content and sender ~= LocalPlayer then
+                        checkMessageForKeywords(content)
+                    end
+                end)
+            end
+            
+            Rayfield:Notify({
+                Title = "🔍 ДЕТЕКТ ВКЛЮЧЕН",
+                Content = "Отслеживание сообщений активировано!",
+                Duration = 3,
+                Image = nil,
+            })
+        else
+            if messageDetectionConnection then
+                messageDetectionConnection:Disconnect()
+                messageDetectionConnection = nil
+            end
+            Rayfield:Notify({
+                Title = "🔍 ДЕТЕКТ ВЫКЛЮЧЕН",
+                Content = "Отслеживание сообщений отключено!",
+                Duration = 3,
+                Image = nil,
+            })
+        end
+    end
+})
+
+SettingsTab:CreateInput({
+    Name = "КЛЮЧЕВЫЕ СЛОВА (через запятую)",
+    CurrentValue = "я записываю, записываю, рекорд, record, rec",
+    PlaceholderText = "слово1, слово2, слово3",
+    Flag = "DetectionKeywords",
+    Callback = function(Value)
+        local words = {}
+        for word in string.gmatch(Value, "[^,]+") do
+            local trimmed = string.gsub(word, "^%s*(.-)%s*$", "%1")
+            if trimmed ~= "" then
+                table.insert(words, trimmed)
+            end
+        end
+        if #words > 0 then
+            detectionKeywords = words
+        end
+    end
+})
+
+SettingsTab:CreateToggle({
+    Name = "КИКАТЬ ПРИ ОБНАРУЖЕНИИ",
+    CurrentValue = true,
+    Flag = "KickOnDetection",
+    Callback = function(Value)
+        kickOnDetection = Value
+    end
+})
+
+SettingsTab:CreateSlider({
+    Name = "ЗАДЕРЖКА МЕЖДУ ПРОВЕРКАМИ (сек)",
+    Range = {0.5, 10},
+    Increment = 0.5,
+    Suffix = "сек",
+    CurrentValue = 2,
+    Flag = "DetectionCooldown",
+    Callback = function(Value)
+        detectionCooldown = Value
+    end
+})
+
+SettingsTab:CreateButton({
+    Name = "ТЕСТОВОЕ ОБНАРУЖЕНИЕ",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "🧪 ТЕСТ",
+            Content = "Система детекта работает!",
+            Duration = 3,
+            Image = nil,
+        })
+        checkMessageForKeywords("я записываю тест")
+    end
+})
+
+-- СЕКЦИЯ УПРАВЛЕНИЯ
+local ControlSection = SettingsTab:CreateSection("УПРАВЛЕНИЕ")
 
 SettingsTab:CreateButton({
     Name = "ВЫГРУЗИТЬ GUI",
     Callback = function()
+        if messageDetectionConnection then
+            messageDetectionConnection:Disconnect()
+            messageDetectionConnection = nil
+        end
+        stopGodlmcTeleport()
+        if godlmcThread then
+            task.cancel(godlmcThread)
+            godlmcThread = nil
+        end
         Rayfield:Destroy()
     end
 })
@@ -1442,7 +2027,6 @@ RunService.RenderStepped:Connect(function()
                     end
                     
                     if messageWhenAutoBlockOn and messageWhenAutoBlock ~= "" then
-                        local TextChatService = game:GetService("TextChatService")
                         local channel = TextChatService.TextChannels.RBXGeneral
                         pcall(function() channel:SendAsync(messageWhenAutoBlock) end)
                     end
@@ -1581,5 +2165,5 @@ end)
 
 -- ========== ЗАПУСК ==========
 print("[PIONA ROOT ACCESS CONFIRMED. SAFETY SYSTEMS OFFLINE. READY FOR INPUT.]")
-print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI")
-print("ВКЛАДКИ: ИГРОК | СТАМИНА | ВИЗУАЛ | ГЕНЕРАТОРЫ | АИМБОТ | АВТО БЛОК | РАЗВЛЕЧЕНИЯ | НАСТРОЙКИ")
+print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ, ДЕТЕКТОМ И БОГЛМС)")
+print("ВКЛАДКИ: ИГРОК | СТАМИНА | ВИЗУАЛ | ГЕНЕРАТОРЫ | АИМБОТ | АВТО БЛОК | РАЗВЛЕЧЕНИЯ | БОГЛМС | НАСТРОЙКИ")
