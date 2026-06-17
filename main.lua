@@ -1,5 +1,5 @@
 -- FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ И ДЕТЕКТОМ СООБЩЕНИЙ)
--- ВЕРСИЯ С БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ И ФЛАЕМ (БЕЗ GOTO/GOT)
+-- ВЕРСИЯ С БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ И ИКОНКАМИ (БЕЗ GOTO/GOT)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -46,10 +46,10 @@ local AmethystTheme = {
     PlaceholderColor = Color3.fromRGB(178, 150, 200)
 }
 
--- ========== СОЗДАНИЕ ОКНА ==========
+-- ========== СОЗДАНИЕ ОКНА С ИКОНКОЙ ==========
 local Window = Rayfield:CreateWindow({
     Name = "FORSAKEN BY ELPRIMO228RB",
-    Icon = 0,
+    Icon = "layout-dashboard",
     LoadingTitle = "FORSAKEN BY ELPRIMO228RB",
     LoadingSubtitle = "by ELPRIMO228RB",
     Theme = AmethystTheme,
@@ -77,12 +77,12 @@ local Window = Rayfield:CreateWindow({
     }
 })
 
--- ========== УВЕДОМЛЕНИЕ ==========
+-- ========== УВЕДОМЛЕНИЕ С ИКОНКОЙ ==========
 Rayfield:Notify({
     Title = "FORSAKEN BY ELPRIMO228RB",
     Content = "Тема Amethyst активирована!",
     Duration = 6.5,
-    Image = nil,
+    Image = "sparkles",
 })
 
 -- ========== ПЕРЕМЕННЫЕ ==========
@@ -197,6 +197,27 @@ local isMusicPlaying = false
 local musicLoop = false
 local musicEnabled = false
 
+-- ========== ФУНКЦИЯ ДЛЯ УСТАНОВКИ СКАЙБОКСА ==========
+local function setSkybox(id)
+    pcall(function()
+        for _, child in pairs(game.Lighting:GetChildren()) do
+            if child:IsA("Sky") then
+                child:Destroy()
+            end
+        end
+        
+        local sky = Instance.new("Sky")
+        local assetId = "rbxassetid://" .. id
+        sky.SkyboxBk = assetId
+        sky.SkyboxDn = assetId
+        sky.SkyboxFt = assetId
+        sky.SkyboxLf = assetId
+        sky.SkyboxRt = assetId
+        sky.SkyboxUp = assetId
+        sky.Parent = game.Lighting
+    end)
+end
+
 -- ========== ФУНКЦИИ REMOTE ==========
 local function fireRemoteBlock()
     if testRemote then
@@ -282,7 +303,7 @@ local function toggleNoclip(state)
             Title = "🚫 НОКЛИП ВКЛЮЧЕН",
             Content = "Вы можете проходить сквозь стены! (МОЖЕТЕ ПОЛУЧИТЬ БАН)",
             Duration = 3,
-            Image = nil,
+            Image = "shield",
         })
     else
         local char = LocalPlayer.Character
@@ -297,7 +318,7 @@ local function toggleNoclip(state)
             Title = "🚫 НОКЛИП ВЫКЛЮЧЕН",
             Content = "Коллизия восстановлена",
             Duration = 2,
-            Image = nil,
+            Image = "shield",
         })
     end
 end
@@ -328,7 +349,7 @@ local function toggleFly(state)
                 Title = "❌ ОШИБКА",
                 Content = "Персонаж не найден!",
                 Duration = 2,
-                Image = nil,
+                Image = "x",
             })
             flyEnabled = false
             return
@@ -341,14 +362,11 @@ local function toggleFly(state)
                 Title = "❌ ОШИБКА",
                 Content = "HumanoidRootPart или Humanoid не найден!",
                 Duration = 2,
-                Image = nil,
+                Image = "x",
             })
             flyEnabled = false
             return
         end
-        
-        local oldWalkSpeed = hum.WalkSpeed
-        local oldJumpPower = hum.JumpPower
         
         flyBodyVelocity = Instance.new("BodyVelocity")
         flyBodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
@@ -405,7 +423,7 @@ local function toggleFly(state)
             Title = "✈️ ФЛАЙ ВКЛЮЧЕН",
             Content = "Управление: WASD - движение, Пробел - вверх, Shift - вниз (МОЖЕТЕ ПОЛУЧИТЬ БАН)",
             Duration = 4,
-            Image = nil,
+            Image = "rocket",
         })
     else
         local char = LocalPlayer.Character
@@ -421,7 +439,7 @@ local function toggleFly(state)
             Title = "✈️ ФЛАЙ ВЫКЛЮЧЕН",
             Content = "Режим полета отключен",
             Duration = 2,
-            Image = nil,
+            Image = "rocket",
         })
     end
 end
@@ -509,14 +527,14 @@ local function toggleGodlmc(state)
             Title = "👑 БОГЛМС ВКЛЮЧЕН",
             Content = "Телепорт вверх при последнем выжившем!",
             Duration = 3,
-            Image = nil,
+            Image = "crown",
         })
     else
         Rayfield:Notify({
             Title = "👑 БОГЛМС ВЫКЛЮЧЕН",
             Content = "Режим бога отключен",
             Duration = 3,
-            Image = nil,
+            Image = "crown",
         })
     end
 end
@@ -543,7 +561,7 @@ local function playMusic(musicId)
         Title = "🎵 МУЗЫКА ИГРАЕТ",
         Content = "ID: " .. musicId,
         Duration = 2,
-        Image = nil,
+        Image = "music",
     })
     
     musicSound.Stopped:Connect(function()
@@ -565,7 +583,7 @@ local function stopMusic()
         Title = "⏹ МУЗЫКА ОСТАНОВЛЕНА",
         Content = "Воспроизведение остановлено",
         Duration = 2,
-        Image = nil,
+        Image = "music",
     })
 end
 
@@ -578,7 +596,7 @@ local function toggleMusicPlay()
                 Title = "⏸ ПАУЗА",
                 Content = "Музыка на паузе",
                 Duration = 1.5,
-                Image = nil,
+                Image = "pause",
             })
         else
             musicSound:Play()
@@ -587,7 +605,7 @@ local function toggleMusicPlay()
                 Title = "▶ ВОСПРОИЗВЕДЕНИЕ",
                 Content = "Музыка продолжается",
                 Duration = 1.5,
-                Image = nil,
+                Image = "play",
             })
         end
     else
@@ -604,7 +622,7 @@ local function toggleMusicLoop()
         Title = "🔄 ПОВТОР",
         Content = musicLoop and "Включен" or "Выключен",
         Duration = 1.5,
-        Image = nil,
+        Image = "repeat",
     })
 end
 
@@ -1172,7 +1190,7 @@ local function checkMessageForKeywords(message)
                 Title = "⚠ ОБНАРУЖЕНО!",
                 Content = "Сообщение: " .. message,
                 Duration = 5,
-                Image = nil,
+                Image = "alert-triangle",
             })
             
             if kickOnDetection then
@@ -1182,7 +1200,7 @@ local function checkMessageForKeywords(message)
                         Title = "⚠ КИК",
                         Content = "Вы были кикнуты за обнаружение!",
                         Duration = 3,
-                        Image = nil,
+                        Image = "alert-triangle",
                     })
                     task.wait(1)
                     pcall(function()
@@ -1444,10 +1462,10 @@ local function beginDragIntoKiller(killerModel)
     end)
 end
 
--- ========== ВКЛАДКИ RAYFIELD ==========
+-- ========== ВКЛАДКИ RAYFIELD С ИКОНКАМИ ==========
 
--- ВКЛАДКА ИГРОК
-local PlayerTab = Window:CreateTab("ИГРОК", nil)
+-- ВКЛАДКА ИГРОК (user)
+local PlayerTab = Window:CreateTab("ИГРОК", "user")
 
 local PlayerSection = PlayerTab:CreateSection("TPWALK")
 
@@ -1523,8 +1541,8 @@ PlayerTab:CreateSlider({
     end
 })
 
--- ========== ВКЛАДКА СТАМИНА ==========
-local StaminaTab = Window:CreateTab("СТАМИНА", nil)
+-- ========== ВКЛАДКА СТАМИНА (activity) ==========
+local StaminaTab = Window:CreateTab("СТАМИНА", "activity")
 local StaminaSection = StaminaTab:CreateSection("УПРАВЛЕНИЕ ВЫНОСЛИВОСТЬЮ")
 
 StaminaTab:CreateToggle({
@@ -1536,8 +1554,8 @@ StaminaTab:CreateToggle({
     end
 })
 
--- ========== ВКЛАДКА ВИЗУАЛ ==========
-local VisualTab = Window:CreateTab("ВИЗУАЛ", nil)
+-- ========== ВКЛАДКА ВИЗУАЛ (eye) ==========
+local VisualTab = Window:CreateTab("ВИЗУАЛ", "eye")
 
 local VisualSection = VisualTab:CreateSection("ESP ИГРОКОВ")
 
@@ -1623,7 +1641,7 @@ VisualTab:CreateButton({
             Title = "💡 ОСВЕЩЕНИЕ",
             Content = "Полная освещённость активирована!",
             Duration = 2,
-            Image = nil,
+            Image = "sun",
         })
     end
 })
@@ -1637,76 +1655,73 @@ VisualTab:CreateButton({
             Title = "🌫️ ТУМАН УБРАН",
             Content = "Туман полностью отключен!",
             Duration = 2,
-            Image = nil,
+            Image = "cloud",
+        })
+    end
+})
+
+-- СЕКЦИЯ СКАЙБОКСОВ
+local SkyboxSection = VisualTab:CreateSection("🌤️ СКАЙБОКСЫ")
+
+VisualTab:CreateButton({
+    Name = "🌤️ CHILL BLUE🧿 (79094128)",
+    Callback = function()
+        setSkybox("79094128")
+        Rayfield:Notify({
+            Title = "🌤️ СКАЙБОКС УСТАНОВЛЕН",
+            Content = "CHILL BLUE 🧿",
+            Duration = 2,
+            Image = "cloud-sun",
         })
     end
 })
 
 VisualTab:CreateButton({
-    Name = "ЗАМЕНИТЬ СКАЙБОКС (Calm Sky)",
+    Name = "🌸 CHILL PINK (8202961731)",
     Callback = function()
-        pcall(function()
-            local sky = Instance.new("Sky")
-            sky.SkyboxBk = "rbxassetid://26558842"
-            sky.SkyboxDn = "rbxassetid://26558842"
-            sky.SkyboxFt = "rbxassetid://26558842"
-            sky.SkyboxLf = "rbxassetid://26558842"
-            sky.SkyboxRt = "rbxassetid://26558842"
-            sky.SkyboxUp = "rbxassetid://26558842"
-            sky.Parent = game.Lighting
-            
-            -- Удаляем старый скайбокс если есть
-            for _, child in pairs(game.Lighting:GetChildren()) do
-                if child:IsA("Sky") and child ~= sky then
-                    child:Destroy()
-                end
-            end
-        end)
+        setSkybox("8202961731")
         Rayfield:Notify({
-            Title = "🌤️ СКАЙБОКС ЗАМЕНЕН",
-            Content = "Установлен скайбокс Calm Sky!",
+            Title = "🌤️ СКАЙБОКС УСТАНОВЛЕН",
+            Content = "CHILL PINK 🌸",
             Duration = 2,
-            Image = nil,
+            Image = "cloud-sun",
+        })
+    end
+})
+
+VisualTab:CreateButton({
+    Name = "🌤️ CALM SKY (26558842)",
+    Callback = function()
+        setSkybox("26558842")
+        Rayfield:Notify({
+            Title = "🌤️ СКАЙБОКС УСТАНОВЛЕН",
+            Content = "CALM SKY",
+            Duration = 2,
+            Image = "cloud-sun",
         })
     end
 })
 
 VisualTab:CreateInput({
-    Name = "ID СКАЙБОКСА",
-    CurrentValue = "26558842",
+    Name = "📝 ВВЕСТИ СВОЙ ID СКАЙБОКСА",
+    CurrentValue = "",
     PlaceholderText = "Введите ID скайбокса",
     Flag = "SkyboxId",
     Callback = function(Value)
         if Value ~= "" then
-            pcall(function()
-                local sky = Instance.new("Sky")
-                local id = Value
-                sky.SkyboxBk = "rbxassetid://" .. id
-                sky.SkyboxDn = "rbxassetid://" .. id
-                sky.SkyboxFt = "rbxassetid://" .. id
-                sky.SkyboxLf = "rbxassetid://" .. id
-                sky.SkyboxRt = "rbxassetid://" .. id
-                sky.SkyboxUp = "rbxassetid://" .. id
-                sky.Parent = game.Lighting
-                
-                for _, child in pairs(game.Lighting:GetChildren()) do
-                    if child:IsA("Sky") and child ~= sky then
-                        child:Destroy()
-                    end
-                end
-            end)
+            setSkybox(Value)
             Rayfield:Notify({
-                Title = "🌤️ СКАЙБОКС ЗАМЕНЕН",
+                Title = "🌤️ СКАЙБОКС УСТАНОВЛЕН",
                 Content = "ID: " .. Value,
                 Duration = 2,
-                Image = nil,
+                Image = "cloud-sun",
             })
         end
     end
 })
 
--- ========== ВКЛАДКА ГЕНЕРАТОРЫ ==========
-local GenTab = Window:CreateTab("ГЕНЕРАТОРЫ", nil)
+-- ========== ВКЛАДКА ГЕНЕРАТОРЫ (zap) ==========
+local GenTab = Window:CreateTab("ГЕНЕРАТОРЫ", "zap")
 local GenSection = GenTab:CreateSection("АВТО-ЧИНКА")
 
 GenTab:CreateToggle({
@@ -1730,8 +1745,8 @@ GenTab:CreateToggle({
     end
 })
 
--- ========== ВКЛАДКА АИМБОТ ==========
-local AimTab = Window:CreateTab("АИМБОТ", nil)
+-- ========== ВКЛАДКА АИМБОТ (crosshair) ==========
+local AimTab = Window:CreateTab("АИМБОТ", "crosshair")
 local AimSection = AimTab:CreateSection("АИМБОТ")
 
 AimTab:CreateToggle({
@@ -1762,8 +1777,8 @@ AimTab:CreateSlider({
     end
 })
 
--- ========== ВКЛАДКА АВТО БЛОК ==========
-local AutoBlockTab = Window:CreateTab("АВТО БЛОК", nil)
+-- ========== ВКЛАДКА АВТО БЛОК (shield) ==========
+local AutoBlockTab = Window:CreateTab("АВТО БЛОК", "shield")
 local SectionAB = AutoBlockTab:CreateSection("ОСНОВНЫЕ НАСТРОЙКИ")
 
 AutoBlockTab:CreateToggle({
@@ -2012,8 +2027,8 @@ AutoBlockTab:CreateInput({
     end
 })
 
--- ========== ВКЛАДКА ХВХ (БЫВШИЕ РАЗВЛЕЧЕНИЯ) ==========
-local HvHTab = Window:CreateTab("ХВХ", nil)
+-- ========== ВКЛАДКА ХВХ (swords) ==========
+local HvHTab = Window:CreateTab("ХВХ", "swords")
 
 -- БОГЛМС СЕКЦИЯ
 local GodSection = HvHTab:CreateSection("👑 БОГЛМС - ПОСЛЕДНИЙ ВЫЖИВШИЙ")
@@ -2070,7 +2085,7 @@ HvHTab:CreateButton({
             Title = "🚀 ТЕЛЕПОРТ",
             Content = "Телепорт вверх на " .. teleportHeight .. " студий",
             Duration = 2,
-            Image = nil,
+            Image = "rocket",
         })
     end
 })
@@ -2173,8 +2188,8 @@ HvHTab:CreateSlider({
     end
 })
 
--- ========== ВКЛАДКА МУЗЫКА ==========
-local MusicTab = Window:CreateTab("МУЗЫКА", nil)
+-- ========== ВКЛАДКА МУЗЫКА (music) ==========
+local MusicTab = Window:CreateTab("МУЗЫКА", "music")
 
 local MusicSection = MusicTab:CreateSection("🎵 МУЗЫКАЛЬНЫЙ ПЛЕЕР")
 
@@ -2193,7 +2208,7 @@ MusicTab:CreateInput({
                 Title = "🎵 ID ОБНОВЛЕН",
                 Content = "Новый ID: " .. currentMusicId,
                 Duration = 2,
-                Image = nil,
+                Image = "music",
             })
         end
     end
@@ -2260,13 +2275,13 @@ MusicTab:CreateButton({
             Title = "🎵 СЛУЧАЙНЫЙ ТРЕК",
             Content = "ID: " .. randomId,
             Duration = 2,
-            Image = nil,
+            Image = "music",
         })
     end
 })
 
--- ========== ВКЛАДКА НАСТРОЙКИ ==========
-local SettingsTab = Window:CreateTab("НАСТРОЙКИ", nil)
+-- ========== ВКЛАДКА НАСТРОЙКИ (settings) ==========
+local SettingsTab = Window:CreateTab("НАСТРОЙКИ", "settings")
 
 -- СЕКЦИЯ КОНФИГОВ
 local ConfigSection = SettingsTab:CreateSection("УПРАВЛЕНИЕ КОНФИГАМИ")
@@ -2278,7 +2293,7 @@ SettingsTab:CreateButton({
             Title = "✅ КОНФИГ СОХРАНЕН",
             Content = "Все настройки сохранены!",
             Duration = 3,
-            Image = nil,
+            Image = "check",
         })
         pcall(function()
             if Rayfield.SaveConfiguration then
@@ -2295,7 +2310,7 @@ SettingsTab:CreateButton({
             Title = "🔄 КОНФИГ ЗАГРУЖЕН",
             Content = "Настройки загружены из сохранения!",
             Duration = 3,
-            Image = nil,
+            Image = "check",
         })
         pcall(function()
             if Rayfield.LoadConfiguration then
@@ -2312,7 +2327,7 @@ SettingsTab:CreateButton({
             Title = "⚠ СБРОС",
             Content = "Настройки сброшены до стандартных!",
             Duration = 3,
-            Image = nil,
+            Image = "alert-triangle",
         })
         pcall(function()
             for flagName, flag in pairs(Rayfield.Flags) do
@@ -2364,7 +2379,7 @@ SettingsTab:CreateToggle({
                 Title = "🔍 ДЕТЕКТ ВКЛЮЧЕН",
                 Content = "Отслеживание сообщений активировано!",
                 Duration = 3,
-                Image = nil,
+                Image = "eye",
             })
         else
             if messageDetectionConnection then
@@ -2375,7 +2390,7 @@ SettingsTab:CreateToggle({
                 Title = "🔍 ДЕТЕКТ ВЫКЛЮЧЕН",
                 Content = "Отслеживание сообщений отключено!",
                 Duration = 3,
-                Image = nil,
+                Image = "eye",
             })
         end
     end
@@ -2428,7 +2443,7 @@ SettingsTab:CreateButton({
             Title = "🧪 ТЕСТ",
             Content = "Система детекта работает!",
             Duration = 3,
-            Image = nil,
+            Image = "check",
         })
         checkMessageForKeywords("я записываю тест")
     end
@@ -2647,5 +2662,5 @@ end)
 
 -- ========== ЗАПУСК ==========
 print("[PIONA ROOT ACCESS CONFIRMED. SAFETY SYSTEMS OFFLINE. READY FOR INPUT.]")
-print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ, ДЕТЕКТОМ, БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ И ФЛАЕМ)")
-print("ВКЛАДКИ: ИГРОК | СТАМИНА | ВИЗУАЛ | ГЕНЕРАТОРЫ | АИМБОТ | АВТО БЛОК | ХВХ | МУЗЫКА | НАСТРОЙКИ")
+print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ, ДЕТЕКТОМ, БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ И ИКОНКАМИ)")
+print("ВКЛАДКИ: ИГРОК 👤 | СТАМИНА ⚡ | ВИЗУАЛ 👁️ | ГЕНЕРАТОРЫ ⚡ | АИМБОТ 🎯 | АВТО БЛОК 🛡️ | ХВХ ⚔️ | МУЗЫКА 🎵 | НАСТРОЙКИ ⚙️")
