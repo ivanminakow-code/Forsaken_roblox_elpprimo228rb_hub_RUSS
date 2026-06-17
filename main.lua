@@ -1,5 +1,5 @@
 -- FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ И ДЕТЕКТОМ СООБЩЕНИЙ)
--- ВЕРСИЯ С БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ И ИКОНКАМИ (БЕЗ GOTO/GOT)
+-- ВЕРСИЯ С БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ, ИКОНКАМИ, ПРЫЖКОМ И FOV
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -109,6 +109,12 @@ local healthShowEnabled = false
 local healthThread = nil
 local healthBillboards = {}
 
+-- ========== FOV ПЕРЕМЕННЫЕ ==========
+local fovEnabled = false
+local fovTarget = 120
+local fovConnection = nil
+local defaultFov = 70
+
 -- ========== НОКЛИП И ФЛАЙ ПЕРЕМЕННЫЕ ==========
 local noclipEnabled = false
 local noclipConnection = nil
@@ -197,25 +203,116 @@ local isMusicPlaying = false
 local musicLoop = false
 local musicEnabled = false
 
--- ========== ФУНКЦИЯ ДЛЯ УСТАНОВКИ СКАЙБОКСА ==========
+-- ========== ФУНКЦИЯ ДЛЯ УСТАНОВКИ СКАЙБОКСА (ГАРАНТИРОВАННО РАБОТАЕТ) ==========
 local function setSkybox(id)
     pcall(function()
+        -- Удаляем ВСЁ, что может быть связано с небом
+        local toDestroy = {}
         for _, child in pairs(game.Lighting:GetChildren()) do
-            if child:IsA("Sky") then
-                child:Destroy()
+            if child:IsA("Sky") or child:IsA("Atmosphere") or child:IsA("Bloom") or child:IsA("BlurEffect") or child:IsA("ColorCorrectionEffect") or child:IsA("DepthOfFieldEffect") or child:IsA("SunRaysEffect") then
+                table.insert(toDestroy, child)
             end
         end
         
+        for _, child in pairs(toDestroy) do
+            child:Destroy()
+        end
+        
+        -- Сбрасываем настройки освещения
+        game.Lighting.Ambient = Color3.fromRGB(127, 127, 127)
+        game.Lighting.Brightness = 2
+        game.Lighting.ClockTime = 12
+        game.Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+        game.Lighting.ShadowSoftness = 0
+        game.Lighting.FogEnd = 100000
+        game.Lighting.FogStart = 0
+        game.Lighting.GlobalShadows = true
+        game.Lighting.TimeOfDay = "12:00:00"
+        game.Lighting.Technology = Enum.Technology.Future
+        
+        -- Создаем новый скайбокс
         local sky = Instance.new("Sky")
         local assetId = "rbxassetid://" .. id
+        
         sky.SkyboxBk = assetId
         sky.SkyboxDn = assetId
         sky.SkyboxFt = assetId
         sky.SkyboxLf = assetId
         sky.SkyboxRt = assetId
         sky.SkyboxUp = assetId
+        
+        sky.CelestialBodiesShown = true
+        sky.StarCount = 0
+        sky.MoonAngularSize = 0
+        sky.SunAngularSize = 0
+        
         sky.Parent = game.Lighting
+        
+        -- Дополнительно пробуем через работу с атмосферой
+        local success, atmosphere = pcall(function()
+            return Instance.new("Atmosphere")
+        end)
+        if success and atmosphere then
+            atmosphere.Parent = game.Lighting
+            atmosphere.Atmosphere = Enum.AtmosphereType.None
+            atmosphere.Density = 0
+            atmosphere.Offset = 0
+            atmosphere.Color = Color3.fromRGB(255, 255, 255)
+            atmosphere.Glare = 0
+            atmosphere.Haze = 0
+        end
+        
+        print("[Skybox] Установлен скайбокс с ID: " .. id)
     end)
+end
+
+-- ========== ФУНКЦИЯ ДЛЯ FOV ==========
+local function toggleFov(state)
+    fovEnabled = state
+    
+    if fovConnection then
+        fovConnection:Disconnect()
+        fovConnection = nil
+    end
+    
+    if state then
+        -- Сохраняем текущий FOV
+        local cam = workspace.CurrentCamera
+        if cam then
+            defaultFov = cam.FieldOfView
+        end
+        
+        fovConnection = RunService.Heartbeat:Connect(function()
+            if not fovEnabled then return end
+            local cam = workspace.CurrentCamera
+            if cam then
+                local currentFov = cam.FieldOfView
+                local targetFov = fovTarget
+                -- Плавное изменение
+                local newFov = currentFov + (targetFov - currentFov) * 0.15
+                cam.FieldOfView = newFov
+            end
+        end)
+        
+        Rayfield:Notify({
+            Title = "🔭 FOV ВКЛЮЧЕН",
+            Content = "FOV установлен: " .. fovTarget .. "°",
+            Duration = 2,
+            Image = "eye",
+        })
+    else
+        -- Восстанавливаем стандартный FOV
+        local cam = workspace.CurrentCamera
+        if cam then
+            cam.FieldOfView = defaultFov
+        end
+        Rayfield:Notify({
+            Title = "🔭 FOV ВЫКЛЮЧЕН",
+            Content = "FOV восстановлен: " .. defaultFov .. "°",
+            Duration = 2,
+            Image = "eye",
+        })
+    end
 end
 
 -- ========== ФУНКЦИИ REMOTE ==========
@@ -1508,6 +1605,73 @@ PlayerTab:CreateSlider({
     end
 })
 
+-- СЕКЦИЯ ПРЫЖОК
+local JumpSection = PlayerTab:CreateSection("🦘 ПРЫЖОК")
+
+PlayerTab:CreateToggle({
+    Name = "ВКЛЮЧИТЬ ПРЫЖОК",
+    CurrentValue = false,
+    Flag = "JumpToggle",
+    Callback = function(Value)
+        if Value then
+            local char = LocalPlayer.Character
+            if char then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum.JumpPower = 50
+                    hum.JumpEnabled = true
+                    Rayfield:Notify({
+                        Title = "🦘 ПРЫЖОК ВКЛЮЧЕН",
+                        Content = "Прыжок активирован!",
+                        Duration = 2,
+                        Image = "move-up",
+                    })
+                end
+            end
+        else
+            local char = LocalPlayer.Character
+            if char then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum.JumpPower = 0
+                    hum.JumpEnabled = false
+                    Rayfield:Notify({
+                        Title = "🦘 ПРЫЖОК ВЫКЛЮЧЕН",
+                        Content = "Прыжок деактивирован!",
+                        Duration = 2,
+                        Image = "move-up",
+                    })
+                end
+            end
+        end
+    end
+})
+
+PlayerTab:CreateSlider({
+    Name = "СИЛА ПРЫЖКА",
+    Range = {10, 200},
+    Increment = 5,
+    Suffix = "%",
+    CurrentValue = 100,
+    Flag = "JumpPower",
+    Callback = function(Value)
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                local power = (Value / 100) * 50
+                hum.JumpPower = power
+                Rayfield:Notify({
+                    Title = "🦘 СИЛА ПРЫЖКА",
+                    Content = "Установлена: " .. math.floor(power) .. " (" .. Value .. "%)",
+                    Duration = 1.5,
+                    Image = "move-up",
+                })
+            end
+        end
+    end
+})
+
 -- СЕКЦИЯ НОКЛИП И ФЛАЙ
 local FlySection = PlayerTab:CreateSection("⚠️ ОПАСНЫЕ ФУНКЦИИ (МОЖЕТЕ ПОЛУЧИТЬ БАН)")
 
@@ -1538,19 +1702,6 @@ PlayerTab:CreateSlider({
     Flag = "FlySpeed",
     Callback = function(Value)
         flySpeed = Value
-    end
-})
-
--- ========== ВКЛАДКА СТАМИНА (activity) ==========
-local StaminaTab = Window:CreateTab("СТАМИНА", "activity")
-local StaminaSection = StaminaTab:CreateSection("УПРАВЛЕНИЕ ВЫНОСЛИВОСТЬЮ")
-
-StaminaTab:CreateToggle({
-    Name = "БЕСКОНЕЧНАЯ ВЫНОСЛИВОСТЬ",
-    CurrentValue = false,
-    Flag = "InfiniteStamina",
-    Callback = function(Value)
-        toggleInfiniteStamina(Value)
     end
 })
 
@@ -1623,6 +1774,42 @@ VisualTab:CreateToggle({
     end
 })
 
+-- СЕКЦИЯ FOV
+local FovSection = VisualTab:CreateSection("🔭 FOV (УВЕЛИЧЕНИЕ ОБЗОРА)")
+
+VisualTab:CreateToggle({
+    Name = "ВКЛЮЧИТЬ FOV",
+    CurrentValue = false,
+    Flag = "FovToggle",
+    Callback = function(Value)
+        toggleFov(Value)
+    end
+})
+
+VisualTab:CreateSlider({
+    Name = "ЗНАЧЕНИЕ FOV",
+    Range = {70, 160},
+    Increment = 1,
+    Suffix = "°",
+    CurrentValue = 120,
+    Flag = "FovValue",
+    Callback = function(Value)
+        fovTarget = Value
+        if fovEnabled then
+            local cam = workspace.CurrentCamera
+            if cam then
+                cam.FieldOfView = Value
+            end
+            Rayfield:Notify({
+                Title = "🔭 FOV ОБНОВЛЕН",
+                Content = "Новое значение: " .. Value .. "°",
+                Duration = 1.5,
+                Image = "eye",
+            })
+        end
+    end
+})
+
 -- СЕКЦИЯ ОСВЕЩЕНИЯ И ТУМАНА
 local LightingSection = VisualTab:CreateSection("💡 ОСВЕЩЕНИЕ И ТУМАН")
 
@@ -1664,38 +1851,12 @@ VisualTab:CreateButton({
 local SkyboxSection = VisualTab:CreateSection("🌤️ СКАЙБОКСЫ")
 
 VisualTab:CreateButton({
-    Name = "🌤️ CHILL BLUE🧿 (79094128)",
+    Name = "🌸 PINK CHILL SKYBOX (8712772312)",
     Callback = function()
-        setSkybox("79094128")
+        setSkybox("8712772312")
         Rayfield:Notify({
             Title = "🌤️ СКАЙБОКС УСТАНОВЛЕН",
-            Content = "CHILL BLUE 🧿",
-            Duration = 2,
-            Image = "cloud-sun",
-        })
-    end
-})
-
-VisualTab:CreateButton({
-    Name = "🌸 CHILL PINK (8202961731)",
-    Callback = function()
-        setSkybox("8202961731")
-        Rayfield:Notify({
-            Title = "🌤️ СКАЙБОКС УСТАНОВЛЕН",
-            Content = "CHILL PINK 🌸",
-            Duration = 2,
-            Image = "cloud-sun",
-        })
-    end
-})
-
-VisualTab:CreateButton({
-    Name = "🌤️ CALM SKY (26558842)",
-    Callback = function()
-        setSkybox("26558842")
-        Rayfield:Notify({
-            Title = "🌤️ СКАЙБОКС УСТАНОВЛЕН",
-            Content = "CALM SKY",
+            Content = "PINK CHILL 🌸",
             Duration = 2,
             Image = "cloud-sun",
         })
@@ -1717,6 +1878,19 @@ VisualTab:CreateInput({
                 Image = "cloud-sun",
             })
         end
+    end
+})
+
+-- ========== ВКЛАДКА СТАМИНА (activity) ==========
+local StaminaTab = Window:CreateTab("СТАМИНА", "activity")
+local StaminaSection = StaminaTab:CreateSection("УПРАВЛЕНИЕ ВЫНОСЛИВОСТЬЮ")
+
+StaminaTab:CreateToggle({
+    Name = "БЕСКОНЕЧНАЯ ВЫНОСЛИВОСТЬ",
+    CurrentValue = false,
+    Flag = "InfiniteStamina",
+    Callback = function(Value)
+        toggleInfiniteStamina(Value)
     end
 })
 
@@ -2467,6 +2641,7 @@ SettingsTab:CreateButton({
         stopMusic()
         toggleFly(false)
         toggleNoclip(false)
+        toggleFov(false)
         Rayfield:Destroy()
     end
 })
@@ -2662,5 +2837,5 @@ end)
 
 -- ========== ЗАПУСК ==========
 print("[PIONA ROOT ACCESS CONFIRMED. SAFETY SYSTEMS OFFLINE. READY FOR INPUT.]")
-print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ, ДЕТЕКТОМ, БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ И ИКОНКАМИ)")
-print("ВКЛАДКИ: ИГРОК 👤 | СТАМИНА ⚡ | ВИЗУАЛ 👁️ | ГЕНЕРАТОРЫ ⚡ | АИМБОТ 🎯 | АВТО БЛОК 🛡️ | ХВХ ⚔️ | МУЗЫКА 🎵 | НАСТРОЙКИ ⚙️")
+print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ, ДЕТЕКТОМ, БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ, ИКОНКАМИ, ПРЫЖКОМ И FOV)")
+print("ВКЛАДКИ: ИГРОК 👤 | ВИЗУАЛ 👁️ | СТАМИНА ⚡ | ГЕНЕРАТОРЫ ⚡ | АИМБОТ 🎯 | АВТО БЛОК 🛡️ | ХВХ ⚔️ | МУЗЫКА 🎵 | НАСТРОЙКИ ⚙️")
