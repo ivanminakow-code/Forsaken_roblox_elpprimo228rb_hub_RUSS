@@ -1,4 +1,4 @@
--- FORSAKEN BY ELPRIMO228RB - RAYFIELD GUI (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ)
+-- FORSAKEN BY ELPRIMO228RB - ZYPHER GUI (ПОЛНАЯ ВЕРСИЯ)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -6,125 +6,74 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- ========== ЗАГРУЗКА ZYPHER ==========
+local Zypher = loadstring(game:HttpGet('https://raw.githubusercontent.com/teppyboy/RbxScripts/master/Misc/UI_Libraries/Zypher/Library.lua'))()
 
--- ПЛАВАЮЩАЯ КНОПКА ДЛЯ ТЕЛЕФОНА
-local floatingBtn = Instance.new("ImageButton")
-floatingBtn.Size = UDim2.new(0, 60, 0, 60)
-floatingBtn.Position = UDim2.new(0.85, 0, 0.85, 0)
-floatingBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-floatingBtn.BackgroundTransparency = 0.15
-floatingBtn.Image = "rbxassetid://7641916668"
-floatingBtn.ScaleType = Enum.ScaleType.Fit
-floatingBtn.Parent = game:GetService("CoreGui")
-floatingBtn.ZIndex = 1000
+-- ========== ПЛАВАЮЩАЯ КНОПКА ==========
+local floatingButton = Instance.new("ImageButton")
+floatingButton.Size = UDim2.new(0, 55, 0, 55)
+floatingButton.Position = UDim2.new(0.85, 0, 0.85, 0)
+floatingButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+floatingButton.BackgroundTransparency = 0.15
+floatingButton.Image = "rbxassetid://7641916668"
+floatingButton.ScaleType = Enum.ScaleType.Fit
+floatingButton.Parent = game:GetService("CoreGui")
+floatingButton.ZIndex = 1000
 
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(1, 0)
-btnCorner.Parent = floatingBtn
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(1, 0)
+buttonCorner.Parent = floatingButton
 
--- ПЕРЕТАСКИВАНИЕ ПЛАВАЮЩЕЙ КНОПКИ
-local dragActive = false
-local dragStart = Vector2.new()
-local dragStartPos = UDim2.new()
+-- ПЕРЕТАСКИВАНИЕ КНОПКИ
+local buttonDragActive = false
+local buttonDragStartPos = Vector2.new()
+local buttonStartPosition = UDim2.new()
 
-floatingBtn.InputBegan:Connect(function(input)
+floatingButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragActive = true
-        dragStart = input.Position
-        dragStartPos = floatingBtn.Position
+        buttonDragActive = true
+        buttonDragStartPos = input.Position
+        buttonStartPosition = floatingButton.Position
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-    if dragActive and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-        local delta = input.Position - dragStart
-        local scrSize = game:GetService("CoreGui").AbsoluteSize
-        local btnSize = floatingBtn.AbsoluteSize
-        floatingBtn.Position = UDim2.new(0, math.clamp(dragStartPos.X.Offset + delta.X, 0, scrSize.X - btnSize.X), 0, math.clamp(dragStartPos.Y.Offset + delta.Y, 0, scrSize.Y - btnSize.Y))
+    if buttonDragActive then
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - buttonDragStartPos
+            local newXOffset = buttonStartPosition.X.Offset + delta.X
+            local newYOffset = buttonStartPosition.Y.Offset + delta.Y
+            local screenSize = workspace.CurrentCamera.ViewportSize
+            local btnSize = floatingButton.AbsoluteSize
+            floatingButton.Position = UDim2.new(0, math.clamp(newXOffset, 0, screenSize.X - btnSize.X), 0, math.clamp(newYOffset, 0, screenSize.Y - btnSize.Y))
+        end
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragActive = false
+        buttonDragActive = false
     end
 end)
 
--- ОТКРЫТИЕ/ЗАКРЫТИЕ ОКНА
-local windowVisible = true
+-- ========== СОЗДАНИЕ ОКНА ZYPHER ==========
+local Window = Zypher:CreateMain({
+    projName = "FORSAKEN BY ELPRIMO228RB",
+    Resizable = true,
+    MinSize = UDim2.new(0, 700, 0, 500),
+    MaxSize = UDim2.new(0, 900, 0, 700)
+})
 
-floatingBtn.MouseButton1Click:Connect(function()
+-- ОТКРЫТИЕ/ЗАКРЫТИЕ ЧЕРЕЗ КНОПКУ
+local windowVisible = true
+floatingButton.MouseButton1Click:Connect(function()
     windowVisible = not windowVisible
     if windowVisible then
-        Rayfield:ToggleVisibility(true)
+        Window.Motherframe.Visible = true
     else
-        Rayfield:ToggleVisibility(false)
+        Window.Motherframe.Visible = false
     end
 end)
-
--- ========== ТЕМЫ ==========
-local Themes = {
-    Default = {
-        Background = Color3.fromRGB(25, 25, 30),
-        Header = Color3.fromRGB(35, 35, 45),
-        Accent = Color3.fromRGB(0, 150, 255),
-        Text = Color3.fromRGB(255, 255, 255),
-        Text2 = Color3.fromRGB(200, 200, 200),
-    },
-    Nya = {
-        Background = Color3.fromRGB(45, 15, 45),
-        Header = Color3.fromRGB(60, 20, 60),
-        Accent = Color3.fromRGB(255, 100, 200),
-        Text = Color3.fromRGB(255, 220, 240),
-        Text2 = Color3.fromRGB(255, 180, 220),
-    },
-    Lava = {
-        Background = Color3.fromRGB(25, 10, 5),
-        Header = Color3.fromRGB(45, 20, 10),
-        Accent = Color3.fromRGB(255, 120, 0),
-        Text = Color3.fromRGB(255, 200, 100),
-        Text2 = Color3.fromRGB(255, 160, 50),
-    }
-}
-
-local currentTheme = "Default"
-
-local function applyTheme(themeName)
-    currentTheme = themeName
-    local theme = Themes[themeName]
-    if not theme then return end
-    pcall(function()
-        Rayfield:ModifyTheme(themeName)
-    end)
-end
-
--- ========== ИНИЦИАЛИЗАЦИЯ ОКНА ==========
-local Window = Rayfield:CreateWindow({
-    Name = "FORSAKEN BY ELPRIMO228RB",
-    LoadingTitle = "FORSAKEN ELPRIMO228RB",
-    LoadingSubtitle = "by ELPRIMO228RB",
-    ConfigurationSaving = {
-       Enabled = true,
-       FolderName = "ELPRIMO228RB_HUB",
-       FileName = "Settings"
-    },
-    Discord = {
-       Enabled = false,
-       Invite = "noinvitelink",
-       RememberJoins = true
-    },
-    KeySystem = false,
-    KeySettings = {
-       Title = "Key System",
-       Subtitle = "Key System",
-       Note = "No key required",
-       FileName = "Key",
-       SaveKey = true,
-       GrabKeyFromSite = false,
-       Key = {"key"}
-    }
-})
 
 -- ========== ПЕРЕМЕННЫЕ ==========
 local tpwalkActive = false
@@ -142,18 +91,20 @@ local aimEnabled = false
 local aimConn = nil
 local aimRadius = 150
 
--- ПЕРЕМЕННЫЕ ДЛЯ ПОДСВЕТКИ ПРЕДМЕТОВ (ОПТИМИЗИРОВАННЫЕ)
 local itemsEspEnabled = false
 local itemsEspThread = nil
 local itemsHighlights = {}
-local itemCache = {}
 
--- ПЕРЕМЕННЫЕ ДЛЯ ПОКАЗА ЗДОРОВЬЯ
 local healthShowEnabled = false
 local healthThread = nil
 local healthBillboards = {}
 
--- ========== АВТО БЛОК ПЕРЕМЕННЫЕ ==========
+-- ========== СТАМИНА ==========
+local infiniteStaminaEnabled = false
+local staminaConnection = nil
+local staminaModule = nil
+
+-- ========== АВТО БЛОК ==========
 local autoBlockOn = false
 local autoBlockAudioOn = false
 local autoblocktype = "Block"
@@ -175,7 +126,6 @@ local messageWhenAutoBlockOn = false
 local messageWhenAutoBlock = ""
 local customFacingDot = -0.3
 
--- ДОПОЛНИТЕЛЬНЫЕ ПЕРЕМЕННЫЕ ДЛЯ BD
 local killerState = {}
 local PRED_SECONDS_FORWARD = 0.25
 local PRED_SECONDS_LATERAL = 0.18
@@ -186,10 +136,7 @@ local SMOOTHING_LERP = 0.22
 local blockPartsSizeMultiplier = 1
 local antiFlickBaseOffset = 2.7
 local antiFlickOffsetStep = 0
-local autoAdjustDBTFBPS = false
-local _savedManualAntiFlickDelay = 0
 
--- ДЛЯ AUDIO AUTO BLOCK
 local soundHooks = {}
 local soundBlockedUntil = {}
 local AUDIO_PREDICT_DT = 0.08
@@ -200,7 +147,7 @@ local lastLocalBlockTime = 0
 local KillersFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Killers")
 local testRemote = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Network") and ReplicatedStorage.Modules.Network:FindFirstChild("RemoteEvent")
 
--- ========== ФУНКЦИИ ДЛЯ РАБОТЫ С REMOTE ==========
+-- ========== ФУНКЦИИ REMOTE ==========
 local function fireRemoteBlock()
     if testRemote then
         local args = {"UseActorAbility", "Block"}
@@ -226,6 +173,38 @@ local function fireRemoteClone()
     if testRemote then
         local args = {"UseActorAbility", "Clone"}
         testRemote:FireServer(unpack(args))
+    end
+end
+
+-- ========== ФУНКЦИЯ СТАМИНЫ ==========
+local function toggleInfiniteStamina(state)
+    infiniteStaminaEnabled = state
+    
+    if staminaConnection then
+        staminaConnection:Disconnect()
+        staminaConnection = nil
+    end
+    
+    if state then
+        local success, module = pcall(function()
+            return require(game.ReplicatedStorage.Systems.Character.Game.Sprinting)
+        end)
+        
+        if success and module then
+            staminaModule = module
+            staminaModule.StaminaLossDisabled = function() end
+            
+            staminaConnection = RunService.Heartbeat:Connect(function()
+                if infiniteStaminaEnabled and staminaModule then
+                    staminaModule.StaminaLossDisabled = function() end
+                end
+            end)
+        end
+    else
+        if staminaModule then
+            staminaModule.StaminaLossDisabled = nil
+            staminaModule = nil
+        end
     end
 end
 
@@ -379,157 +358,7 @@ local function attemptBlockForSound(sound)
     soundBlockedUntil[sound] = now + AUDIO_SOUND_THROTTLE
 end
 
--- ========== ОПТИМИЗИРОВАННАЯ ПОДСВЕТКА ПРЕДМЕТОВ ==========
-local function clearItemsESP()
-    for _, h in pairs(itemsHighlights) do
-        pcall(function() h:Destroy() end)
-    end
-    itemsHighlights = {}
-    itemCache = {}
-end
-
-local function createItemHighlight(obj, outlineColor, fillColor)
-    for _, h in pairs(obj:GetChildren()) do
-        if h:IsA("Highlight") then h:Destroy() end
-    end
-    local h = Instance.new("Highlight")
-    h.Parent = obj
-    h.Adornee = obj
-    h.FillTransparency = 0.75
-    h.FillColor = fillColor
-    h.OutlineColor = outlineColor
-    h.OutlineTransparency = 0
-    table.insert(itemsHighlights, h)
-    return h
-end
-
-local function updateItemsESP()
-    if not itemsEspEnabled then
-        clearItemsESP()
-        return
-    end
-    
-    local allItems = {}
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") then
-            if obj.Name == "BloxyCola" or obj.Name == "Medkit" or obj.Name == "SubspaceTripmine" then
-                table.insert(allItems, obj)
-            end
-        end
-    end
-    
-    for _, h in pairs(itemsHighlights) do
-        if not h or not h.Parent or not h.Parent:IsA("Model") then
-            pcall(function() h:Destroy() end)
-        end
-    end
-    
-    for _, obj in pairs(allItems) do
-        local hasHighlight = false
-        for _, h in pairs(itemsHighlights) do
-            if h and h.Parent == obj then
-                hasHighlight = true
-                break
-            end
-        end
-        
-        if not hasHighlight then
-            if obj.Name == "BloxyCola" then
-                createItemHighlight(obj, Color3.fromRGB(204, 153, 0), Color3.fromRGB(204, 153, 0))
-            elseif obj.Name == "Medkit" then
-                createItemHighlight(obj, Color3.fromRGB(128, 0, 128), Color3.fromRGB(128, 0, 128))
-            elseif obj.Name == "SubspaceTripmine" then
-                local isSurvivorPlaced = false
-                if KillersFolder then
-                    local survivors = workspace.Players:FindFirstChild("Survivors")
-                    if survivors and obj:IsDescendantOf(survivors) then
-                        isSurvivorPlaced = true
-                    end
-                end
-                if not isSurvivorPlaced then
-                    createItemHighlight(obj, Color3.fromRGB(0, 191, 255), Color3.fromRGB(0, 191, 255))
-                end
-            end
-        end
-    end
-    
-    local toRemove = {}
-    for i, h in pairs(itemsHighlights) do
-        if h and h.Parent then
-            local found = false
-            for _, obj in pairs(allItems) do
-                if obj == h.Parent then
-                    found = true
-                    break
-                end
-            end
-            if not found then
-                table.insert(toRemove, i)
-            end
-        else
-            table.insert(toRemove, i)
-        end
-    end
-    
-    for _, i in pairs(toRemove) do
-        pcall(function() 
-            if itemsHighlights[i] then 
-                itemsHighlights[i]:Destroy() 
-            end 
-        end)
-        itemsHighlights[i] = nil
-    end
-end
-
--- ========== ВКЛАДКА ИГРОК ==========
-local PlayerTab = Window:CreateTab("ИГРОК")
-
-local PlayerSection = PlayerTab:CreateSection("TPWALK")
-
-local TpwalkToggle = PlayerTab:CreateToggle({
-    Name = "TPWALK",
-    CurrentValue = false,
-    Flag = "TpwalkToggle",
-    Callback = function(Value)
-        tpwalkActive = Value
-        if tpwalkActive then
-            if tpwalkConn then tpwalkConn:Disconnect() end
-            tpwalkConn = RunService.RenderStepped:Connect(function()
-                if not tpwalkActive then return end
-                local char = LocalPlayer.Character
-                if not char then return end
-                local hum = char:FindFirstChild("Humanoid")
-                local hrp = char:FindFirstChild("HumanoidRootPart")
-                if not hum or not hrp then return end
-                local dir = hum.MoveDirection
-                if dir.Magnitude > 0 then
-                    hrp.CFrame = hrp.CFrame + (dir * tpwalkSpeed)
-                end
-            end)
-        else
-            if tpwalkConn then tpwalkConn:Disconnect() end
-            tpwalkConn = nil
-        end
-    end
-})
-
-local TpwalkSlider = PlayerTab:CreateSlider({
-    Name = "СКОРОСТЬ TPWALK",
-    Range = {5, 100},  -- ИЗМЕНЕНО: макс 100
-    Increment = 1,
-    Suffix = "%",
-    CurrentValue = 15,
-    Flag = "TpwalkSpeed",
-    Callback = function(Value)
-        tpwalkSpeed = Value / 100
-    end
-})
-
--- ========== ВКЛАДКА ВИЗУАЛ ==========
-local VisualTab = Window:CreateTab("ВИЗУАЛ")
-
-local VisualSection = VisualTab:CreateSection("ESP ИГРОКОВ")
-
+-- ========== ESP ФУНКЦИИ ==========
 local function clearESP()
     for _, h in pairs(espHighlights) do
         pcall(function() h:Destroy() end)
@@ -568,13 +397,7 @@ local function updateESP()
                 if obj:IsA("Model") then
                     local hum = obj:FindFirstChildOfClass("Humanoid")
                     if hum and obj:FindFirstChild("HumanoidRootPart") and hum.Health > 0 then
-                        local hasHighlight = false
-                        for _, h in pairs(obj:GetChildren()) do
-                            if h:IsA("Highlight") then hasHighlight = true end
-                        end
-                        if not hasHighlight then
-                            createHighlight(obj, Color3.new(1, 0, 0), Color3.new(1, 0.5, 0.5))
-                        end
+                        createHighlight(obj, Color3.new(1, 0, 0), Color3.new(1, 0.5, 0.5))
                     end
                 end
             end
@@ -586,13 +409,7 @@ local function updateESP()
                 if obj:IsA("Model") then
                     local hum = obj:FindFirstChildOfClass("Humanoid")
                     if hum and obj:FindFirstChild("HumanoidRootPart") and hum.Health > 0 then
-                        local hasHighlight = false
-                        for _, h in pairs(obj:GetChildren()) do
-                            if h:IsA("Highlight") then hasHighlight = true end
-                        end
-                        if not hasHighlight then
-                            createHighlight(obj, Color3.new(0, 1, 0), Color3.new(0.5, 1, 0.5))
-                        end
+                        createHighlight(obj, Color3.new(0, 1, 0), Color3.new(0.5, 1, 0.5))
                     end
                 end
             end
@@ -607,13 +424,7 @@ local function updateESP()
             if m then
                 for _, obj in pairs(m:GetChildren()) do
                     if obj:IsA("Model") and obj.Name == "Generator" then
-                        local hasHighlight = false
-                        for _, h in pairs(obj:GetChildren()) do
-                            if h:IsA("Highlight") then hasHighlight = true end
-                        end
-                        if not hasHighlight then
-                            createHighlight(obj, Color3.new(1, 1, 0), Color3.new(1, 1, 0.5))
-                        end
+                        createHighlight(obj, Color3.new(1, 1, 0), Color3.new(1, 1, 0.5))
                     end
                 end
             end
@@ -621,53 +432,60 @@ local function updateESP()
     end
 end
 
-local EspToggle = VisualTab:CreateToggle({
-    Name = "ESP ИГРОКОВ",
-    CurrentValue = false,
-    Flag = "EspToggle",
-    Callback = function(Value)
-        espEnabled = Value
-        if espEnabled then
-            updateESP()
-            if espThread then espThread:Disconnect() end
-            espThread = RunService.Heartbeat:Connect(function()
-                if espEnabled then updateESP() end
-            end)
-        else
-            if espThread then espThread:Disconnect() end
-            clearESP()
-        end
+-- ========== ПОДСВЕТКА ПРЕДМЕТОВ ==========
+local function clearItemsESP()
+    for _, h in pairs(itemsHighlights) do
+        pcall(function() h:Destroy() end)
     end
-})
+    itemsHighlights = {}
+end
 
--- ========== ПОДСВЕТКА ПРЕДМЕТОВ (ОПТИМИЗИРОВАННАЯ) ==========
-local ItemsSection = VisualTab:CreateSection("ПОДСВЕТКА ПРЕДМЕТОВ")
+local function createItemHighlight(obj, outlineColor, fillColor)
+    for _, h in pairs(obj:GetChildren()) do
+        if h:IsA("Highlight") then h:Destroy() end
+    end
+    local h = Instance.new("Highlight")
+    h.Parent = obj
+    h.Adornee = obj
+    h.FillTransparency = 0.75
+    h.FillColor = fillColor
+    h.OutlineColor = outlineColor
+    h.OutlineTransparency = 0
+    table.insert(itemsHighlights, h)
+    return h
+end
 
-local ItemsEspToggle = VisualTab:CreateToggle({
-    Name = "ПОДСВЕТКА ПРЕДМЕТОВ",
-    CurrentValue = false,
-    Flag = "ItemsEspToggle",
-    Callback = function(Value)
-        itemsEspEnabled = Value
-        if itemsEspEnabled then
-            updateItemsESP()
-            if itemsEspThread then itemsEspThread:Disconnect() end
-            itemsEspThread = RunService.Heartbeat:Connect(function()
-                if itemsEspEnabled then 
-                    updateItemsESP() 
-                    task.wait(0.1)
+local function updateItemsESP()
+    if not itemsEspEnabled then
+        clearItemsESP()
+        return
+    end
+    
+    clearItemsESP()
+    
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") then
+            if obj.Name == "BloxyCola" then
+                createItemHighlight(obj, Color3.fromRGB(204, 153, 0), Color3.fromRGB(204, 153, 0))
+            elseif obj.Name == "Medkit" then
+                createItemHighlight(obj, Color3.fromRGB(128, 0, 128), Color3.fromRGB(128, 0, 128))
+            elseif obj.Name == "SubspaceTripmine" then
+                local isSurvivorPlaced = false
+                if KillersFolder then
+                    local survivors = workspace.Players:FindFirstChild("Survivors")
+                    if survivors and obj:IsDescendantOf(survivors) then
+                        isSurvivorPlaced = true
+                    end
                 end
-            end)
-        else
-            if itemsEspThread then itemsEspThread:Disconnect() end
-            clearItemsESP()
+                if not isSurvivorPlaced then
+                    createItemHighlight(obj, Color3.fromRGB(0, 191, 255), Color3.fromRGB(0, 191, 255))
+                end
+            end
         end
     end
-})
+end
 
--- ========== ПОКАЗ ЗДОРОВЬЯ ==========
-local HealthSection = VisualTab:CreateSection("ПОКАЗ ЗДОРОВЬЯ")
-
+-- ========== ЗДОРОВЬЕ ==========
 local function clearHealthBillboards()
     for _, billboard in pairs(healthBillboards) do
         pcall(function() billboard:Destroy() end)
@@ -678,14 +496,11 @@ end
 local function createHealthBillboard(player)
     local char = player.Character
     if not char then return end
-    
     local head = char:FindFirstChild("Head")
     if not head then return end
     
     for _, b in pairs(healthBillboards) do
-        if b and b.Parent == head then
-            return b
-        end
+        if b and b.Parent == head then return b end
     end
     
     local billboard = Instance.new("BillboardGui")
@@ -780,30 +595,7 @@ local function updateHealthBillboards()
     end
 end
 
-local HealthToggle = VisualTab:CreateToggle({
-    Name = "ПОКАЗ ЗДОРОВЬЯ",
-    CurrentValue = false,
-    Flag = "HealthToggle",
-    Callback = function(Value)
-        healthShowEnabled = Value
-        if healthShowEnabled then
-            updateHealthBillboards()
-            if healthThread then healthThread:Disconnect() end
-            healthThread = RunService.Heartbeat:Connect(function()
-                if healthShowEnabled then updateHealthBillboards() end
-            end)
-        else
-            if healthThread then healthThread:Disconnect() end
-            clearHealthBillboards()
-        end
-    end
-})
-
--- ========== ВКЛАДКА ГЕНЕРАТОРЫ ==========
-local GenTab = Window:CreateTab("ГЕНЕРАТОРЫ")
-
-local GenSection = GenTab:CreateSection("АВТО-ЧИНКА")
-
+-- ========== ГЕНЕРАТОРЫ ==========
 local function fixGens()
     pcall(function()
         local map = workspace:FindFirstChild("Map")
@@ -829,32 +621,7 @@ local function fixGens()
     end)
 end
 
-local AutoGenToggle = GenTab:CreateToggle({
-    Name = "АВТО-ЧИНКА ГЕНЕРАТОРОВ",
-    CurrentValue = false,
-    Flag = "AutoGenToggle",
-    Callback = function(Value)
-        autoGenEnabled = Value
-        if autoGenEnabled then
-            if autoGenLoop then task.cancel(autoGenLoop) end
-            autoGenLoop = spawn(function()
-                while autoGenEnabled do
-                    fixGens()
-                    wait(2.5)
-                end
-            end)
-        else
-            if autoGenLoop then task.cancel(autoGenLoop) end
-            autoGenLoop = nil
-        end
-    end
-})
-
--- ========== ВКЛАДКА АИМБОТ ==========
-local AimTab = Window:CreateTab("АИМБОТ")
-
-local AimSection = AimTab:CreateSection("АИМБОТ")
-
+-- ========== АИМБОТ ==========
 local function getMyTeam()
     local wp = workspace:FindFirstChild("Players")
     if wp then
@@ -931,487 +698,7 @@ local function aimFunc()
     end
 end
 
-local AimToggle = AimTab:CreateToggle({
-    Name = "АИМБОТ",
-    CurrentValue = false,
-    Flag = "AimToggle",
-    Callback = function(Value)
-        aimEnabled = Value
-        if aimEnabled then
-            if aimConn then aimConn:Disconnect() end
-            aimConn = RunService.RenderStepped:Connect(aimFunc)
-        else
-            if aimConn then aimConn:Disconnect() end
-            aimConn = nil
-        end
-    end
-})
-
-local AimSlider = AimTab:CreateSlider({
-    Name = "РАДИУС НАВОДКИ",
-    Range = {50, 300},
-    Increment = 5,
-    Suffix = "Studs",
-    CurrentValue = 150,
-    Flag = "AimRadius",
-    Callback = function(Value)
-        aimRadius = Value
-    end
-})
-
--- ========== ВКЛАДКА АВТО БЛОК ==========
-local AutoBlockTab = Window:CreateTab("АВТО БЛОК")
-
--- Левая группа: основные настройки
-local ABLeftGroup = AutoBlockTab:CreateSection("ОСНОВНЫЕ НАСТРОЙКИ")
-
-local AutoBlockToggle = AutoBlockTab:CreateToggle({
-    Name = "АВТО БЛОК (ПО АНИМАЦИИ)",
-    CurrentValue = false,
-    Flag = "AutoBlockToggle",
-    Callback = function(Value)
-        autoBlockOn = Value
-    end
-})
-
-local AutoBlockAudioToggle = AutoBlockTab:CreateToggle({
-    Name = "АВТО БЛОК (ПО ЗВУКУ)",
-    CurrentValue = false,
-    Flag = "AutoBlockAudioToggle",
-    Callback = function(Value)
-        autoBlockAudioOn = Value
-        if Value and KillersFolder then
-            for _, desc in ipairs(KillersFolder:GetDescendants()) do
-                if desc:IsA("Sound") then
-                    if not soundHooks[desc] then
-                        soundHooks[desc] = { id = extractNumericSoundId(desc) }
-                    end
-                end
-            end
-        end
-    end
-})
-
--- ИЗМЕНЕНО: русские названия для типов блока
-local BlockTypeDropdown = AutoBlockTab:CreateDropdown({
-    Name = "ТИП БЛОКА",
-    Options = {"БЛОК", "ЗАРЯД", "КЛОН 007"},
-    CurrentOption = "БЛОК",
-    Flag = "BlockType",
-    Callback = function(Value)
-        if Value == "БЛОК" then
-            autoblocktype = "Block"
-        elseif Value == "ЗАРЯД" then
-            autoblocktype = "Charge"
-        elseif Value == "КЛОН 007" then
-            autoblocktype = "7n7 Clone"
-        end
-    end
-})
-
-local DetectionRangeInput = AutoBlockTab:CreateInput({
-    Name = "РАДИУС ОБНАРУЖЕНИЯ",
-    CurrentValue = "18",
-    PlaceholderText = "18",
-    Flag = "DetectionRange",
-    Callback = function(Value)
-        detectionRange = tonumber(Value) or 18
-        detectionRangeSq = detectionRange * detectionRange
-    end
-})
-
-local BlockDelayInput = AutoBlockTab:CreateInput({
-    Name = "ЗАДЕРЖКА ПЕРЕД БЛОКОМ (сек)",
-    CurrentValue = "0",
-    PlaceholderText = "0",
-    Flag = "BlockDelay",
-    Callback = function(Value)
-        blockdelay = tonumber(Value) or 0
-    end
-})
-
--- Правая группа: продвинутые настройки
-local ABRightGroup = AutoBlockTab:CreateSection("ПРОДВИНУТЫЕ НАСТРОЙКИ")
-
-local FacingCheckToggle = AutoBlockTab:CreateToggle({
-    Name = "ПРОВЕРКА НАПРАВЛЕНИЯ (ФЕЙСИНГ)",
-    CurrentValue = true,
-    Flag = "FacingCheckToggle",
-    Callback = function(Value)
-        facingCheckEnabled = Value
-    end
-})
-
-local FacingDotInput = AutoBlockTab:CreateInput({
-    Name = "УГОЛ ФЕЙСИНГА (DOT, от -1 до 1)",
-    CurrentValue = "-0.3",
-    PlaceholderText = "-0.3",
-    Flag = "FacingDot",
-    Callback = function(Value)
-        customFacingDot = tonumber(Value) or -0.3
-    end
-})
-
-local DoubleBlockToggle = AutoBlockTab:CreateToggle({
-    Name = "ДВОЙНОЙ ПАНЧ (БЛОК + ПАНЧ)",
-    CurrentValue = false,
-    Flag = "DoubleBlockToggle",
-    Callback = function(Value)
-        doubleblocktech = Value
-    end
-})
-
-local PredictiveBlockToggle = AutoBlockTab:CreateToggle({
-    Name = "ПРЕДИКТИВНЫЙ АВТО БЛОК",
-    CurrentValue = false,
-    Flag = "PredictiveBlockToggle",
-    Callback = function(Value)
-        predictiveBlockOn = Value
-    end
-})
-
-local EdgeKillerInput = AutoBlockTab:CreateInput({
-    Name = "ЗАДЕРЖКА ПРЕДИКТИВНОГО БЛОКА (сек)",
-    CurrentValue = "3",
-    PlaceholderText = "3",
-    Flag = "EdgeKillerDelay",
-    Callback = function(Value)
-        edgeKillerDelay = tonumber(Value) or 3
-    end
-})
-
--- ========== BD (BETTER DETECTION) СЕКЦИЯ ==========
-local BDSection = AutoBlockTab:CreateSection("УЛУЧШЕННОЕ ОБНАРУЖЕНИЕ (BD)")
-
-local AntiFlickToggle = AutoBlockTab:CreateToggle({
-    Name = "ВКЛЮЧИТЬ BD",
-    CurrentValue = false,
-    Flag = "AntiFlickToggle",
-    Callback = function(Value)
-        antiFlickOn = Value
-    end
-})
-
-local AntiFlickPartsInput = AutoBlockTab:CreateInput({
-    Name = "КОЛИЧЕСТВО БЛОК-ЧАСТЕЙ",
-    CurrentValue = "4",
-    PlaceholderText = "4",
-    Flag = "AntiFlickParts",
-    Callback = function(Value)
-        antiFlickParts = math.max(1, math.floor(tonumber(Value) or 4))
-    end
-})
-
-local PartsSizeInput = AutoBlockTab:CreateInput({
-    Name = "МНОЖИТЕЛЬ РАЗМЕРА ЧАСТЕЙ",
-    CurrentValue = "1",
-    PlaceholderText = "1",
-    Flag = "PartsSizeMultiplier",
-    Callback = function(Value)
-        blockPartsSizeMultiplier = tonumber(Value) or 1
-    end
-})
-
-local PredictStrengthInput = AutoBlockTab:CreateInput({
-    Name = "СИЛА ПРЕДСКАЗАНИЯ (ВПЕРЁД)",
-    CurrentValue = "1",
-    PlaceholderText = "1",
-    Flag = "PredictStrength",
-    Callback = function(Value)
-        predictionStrength = tonumber(Value) or 1
-    end
-})
-
-local PredictTurnInput = AutoBlockTab:CreateInput({
-    Name = "СИЛА ПРЕДСКАЗАНИЯ (ПОВОРОТ)",
-    CurrentValue = "1",
-    PlaceholderText = "1",
-    Flag = "PredictTurn",
-    Callback = function(Value)
-        predictionTurnStrength = tonumber(Value) or 1
-    end
-})
-
-local AntiFlickDelayInput = AutoBlockTab:CreateInput({
-    Name = "ЗАДЕРЖКА ПОЯВЛЕНИЯ ЧАСТЕЙ (сек)",
-    CurrentValue = "0",
-    PlaceholderText = "0",
-    Flag = "AntiFlickDelay",
-    Callback = function(Value)
-        antiFlickDelay = math.max(0, tonumber(Value) or 0)
-    end
-})
-
-local StaggerInput = AutoBlockTab:CreateInput({
-    Name = "ЗАДЕРЖКА МЕЖДУ ЧАСТЯМИ (сек)",
-    CurrentValue = "0.02",
-    PlaceholderText = "0.02",
-    Flag = "StaggerDelay",
-    Callback = function(Value)
-        stagger = math.max(0, tonumber(Value) or 0.02)
-    end
-})
-
-local BaseOffsetInput = AutoBlockTab:CreateInput({
-    Name = "ДИСТАНЦИЯ СПАВНА ЧАСТЕЙ (студи)",
-    CurrentValue = "2.7",
-    PlaceholderText = "2.7",
-    Flag = "BaseOffset",
-    Callback = function(Value)
-        antiFlickBaseOffset = math.max(0, tonumber(Value) or 2.7)
-    end
-})
-
--- ========== ХИТБОКС ДРАГГИНГ ==========
-local HDSection = AutoBlockTab:CreateSection("ХИТБОКС ДРАГГИНГ (HDT)")
-
-local HDToggle = AutoBlockTab:CreateToggle({
-    Name = "ВКЛЮЧИТЬ HDT",
-    CurrentValue = false,
-    Flag = "HDToggle",
-    Callback = function(Value)
-        hitboxDraggingTech = Value
-    end
-})
-
-local HDSpeedInput = AutoBlockTab:CreateInput({
-    Name = "СКОРОСТЬ HDT",
-    CurrentValue = "5.6",
-    PlaceholderText = "5.6",
-    Flag = "HDSpeed",
-    Callback = function(Value)
-        Dspeed = tonumber(Value) or 5.6
-    end
-})
-
-local HDDelayInput = AutoBlockTab:CreateInput({
-    Name = "ЗАДЕРЖКА HDT (сек)",
-    CurrentValue = "0",
-    PlaceholderText = "0",
-    Flag = "HDDelay",
-    Callback = function(Value)
-        Ddelay = tonumber(Value) or 0
-    end
-})
-
--- ========== СООБЩЕНИЯ В ЧАТ ==========
-local ChatSection = AutoBlockTab:CreateSection("СООБЩЕНИЯ В ЧАТ")
-
-local ChatBlockToggle = AutoBlockTab:CreateToggle({
-    Name = "ОТПРАВЛЯТЬ СООБЩЕНИЕ ПРИ БЛОКЕ",
-    CurrentValue = false,
-    Flag = "ChatBlockToggle",
-    Callback = function(Value)
-        messageWhenAutoBlockOn = Value
-    end
-})
-
-local ChatBlockInput = AutoBlockTab:CreateInput({
-    Name = "ТЕКСТ СООБЩЕНИЯ",
-    CurrentValue = "",
-    PlaceholderText = "Я блокирую!",
-    Flag = "ChatBlockText",
-    Callback = function(Value)
-        messageWhenAutoBlock = Value
-    end
-})
-
--- ========== ВКЛАДКА РАЗВЛЕЧЕНИЯ ==========
-local FunTab = Window:CreateTab("РАЗВЛЕЧЕНИЯ")
-
-local FunSection = FunTab:CreateSection("СВЕТ")
-
-local FullbrightBtn = FunTab:CreateButton({
-    Name = "ПОЛНАЯ ОСВЕЩЁННОСТЬ",
-    Callback = function()
-        pcall(function()
-            game.Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-            game.Lighting.Brightness = 1
-            game.Lighting.FogEnd = 1e10
-            game.Lighting.FogStart = 100000
-            game.Lighting.TimeOfDay = "12:00:00"
-            game.Lighting.Technology = Enum.Technology.Future
-        end)
-    end
-})
-
-local FogBtn = FunTab:CreateButton({
-    Name = "УБРАТЬ ТУМАН",
-    Callback = function()
-        game.Lighting.FogStart = math.huge
-        game.Lighting.FogEnd = math.huge
-    end
-})
-
--- ========== ВКЛАДКА НАСТРОЙКИ ==========
-local SettingsTab = Window:CreateTab("НАСТРОЙКИ")
-
-local ThemeSection = SettingsTab:CreateSection("ТЕМЫ")
-
-local ThemeNya = SettingsTab:CreateButton({
-    Name = "НЯШНЫЙ (РОЗОВАЯ ТЕМА)",
-    Callback = function()
-        applyTheme("Nya")
-        pcall(function()
-            floatingBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 200)
-            Rayfield:SetWindowName("FORSAKEN BY ELPRIMO228RB")
-        end)
-        Rayfield:Notify({
-            Title = "ТЕМА СМЕНЕНА",
-            Content = "НЯШНЫЙ РЕЖИМ АКТИВИРОВАН!",
-            Duration = 3,
-            Image = 0
-        })
-    end
-})
-
-local ThemeLava = SettingsTab:CreateButton({
-    Name = "ЛАВОВЫЙ (LAVA THEME)",
-    Callback = function()
-        applyTheme("Lava")
-        pcall(function()
-            floatingBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
-            Rayfield:SetWindowName("FORSAKEN BY ELPRIMO228RB")
-        end)
-        Rayfield:Notify({
-            Title = "ТЕМА СМЕНЕНА",
-            Content = "ЛАВОВЫЙ РЕЖИМ АКТИВИРОВАН!",
-            Duration = 3,
-            Image = 0
-        })
-    end
-})
-
-local ThemeDefault = SettingsTab:CreateButton({
-    Name = "СТАНДАРТНАЯ ТЕМА",
-    Callback = function()
-        applyTheme("Default")
-        pcall(function()
-            floatingBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-            Rayfield:SetWindowName("FORSAKEN BY ELPRIMO228RB")
-        end)
-        Rayfield:Notify({
-            Title = "ТЕМА СМЕНЕНА",
-            Content = "СТАНДАРТНАЯ ТЕМА АКТИВИРОВАНА",
-            Duration = 3,
-            Image = 0
-        })
-    end
-})
-
-local SettingsSection2 = SettingsTab:CreateSection("УПРАВЛЕНИЕ")
-
-local UnloadBtn = SettingsTab:CreateButton({
-    Name = "ВЫГРУЗИТЬ GUI",
-    Callback = function()
-        Rayfield:Destroy()
-        floatingBtn:Destroy()
-    end
-})
-
--- ========== ЦИКЛ АВТО БЛОКА ПО АНИМАЦИИ ==========
-RunService.RenderStepped:Connect(function()
-    if not autoBlockOn then return end
-    
-    local myChar = LocalPlayer.Character
-    if not myChar then return end
-    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
-    if not myRoot then return end
-    
-    if not KillersFolder then return end
-    
-    local blockAnims = {
-        "126830014841198", "126355327951215", "121086746534252", "18885909645",
-        "98456918873918", "105458270463374", "83829782357897", "125403313786645",
-        "118298475669935", "82113744478546", "70371667919898", "99135633258223",
-        "97167027849946", "109230267448394", "139835501033932", "126896426760253",
-        "109667959938617", "126681776859538", "129976080405072", "121293883585738",
-        "81639435858902", "137314737492715", "92173139187970", "122709416391", "879895330952"
-    }
-    
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character then
-            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
-            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-            if not hrp or not hum then continue end
-            
-            local dist = (hrp.Position - myRoot.Position).Magnitude
-            if dist > detectionRange then continue end
-            
-            if facingCheckEnabled and not isFacing(myRoot, hrp) then continue end
-            
-            local animator = hum:FindFirstChildOfClass("Animator")
-            if not animator then continue end
-            
-            local tracks = pcall(function() return animator:GetPlayingAnimationTracks() end)
-            if not tracks then continue end
-            
-            for _, track in ipairs(tracks) do
-                local animId = tostring(track.Animation and track.Animation.AnimationId or ""):match("%d+")
-                if animId and table.find(blockAnims, animId) then
-                    task.wait(blockdelay)
-                    if autoblocktype == "Block" then
-                        fireRemoteBlock()
-                        if doubleblocktech then fireRemotePunch() end
-                    elseif autoblocktype == "Charge" then
-                        fireRemoteCharge()
-                    elseif autoblocktype == "7n7 Clone" then
-                        fireRemoteClone()
-                    end
-                    
-                    if messageWhenAutoBlockOn and messageWhenAutoBlock ~= "" then
-                        local TextChatService = game:GetService("TextChatService")
-                        local channel = TextChatService.TextChannels.RBXGeneral
-                        pcall(function() channel:SendAsync(messageWhenAutoBlock) end)
-                    end
-                    break
-                end
-            end
-        end
-    end
-end)
-
--- ========== ПРЕДИКТИВНЫЙ АВТО БЛОК ==========
-local killerInRangeSince = nil
-local predictiveCooldown = 0
-
-RunService.Heartbeat:Connect(function()
-    if not predictiveBlockOn then return end
-    if tick() < predictiveCooldown then return end
-    
-    local myChar = LocalPlayer.Character
-    if not myChar then return end
-    local myHRP = myChar:FindFirstChild("HumanoidRootPart")
-    if not myHRP then return end
-    
-    if not KillersFolder then return end
-    
-    local killerInRange = false
-    for _, killer in ipairs(KillersFolder:GetChildren()) do
-        local hrp = killer:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            local dist = (myHRP.Position - hrp.Position).Magnitude
-            if dist <= detectionRange then
-                killerInRange = true
-                break
-            end
-        end
-    end
-    
-    if killerInRange then
-        if not killerInRangeSince then
-            killerInRangeSince = tick()
-        elseif tick() - killerInRangeSince >= edgeKillerDelay then
-            fireRemoteBlock()
-            predictiveCooldown = tick() + 2
-            killerInRangeSince = nil
-        end
-    else
-        killerInRangeSince = nil
-    end
-end)
-
--- ========== BD (BETTER DETECTION) ПО ЗВУКУ ==========
+-- ========== BD (BETTER DETECTION) ==========
 local function attemptBDParts(sound)
     if not antiFlickOn then return end
     if not sound or not sound:IsA("Sound") then return end
@@ -1528,7 +815,6 @@ local function attemptBDParts(sound)
     end)
 end
 
--- Хуки для звуков
 local function hookSound(sound)
     if not sound or not sound:IsA("Sound") then return end
     if soundHooks[sound] then return end
@@ -1573,63 +859,10 @@ local function hookSound(sound)
     end
 end
 
--- Подключаем хуки для существующих звуков
-task.spawn(function()
-    while not KillersFolder do
-        task.wait(0.5)
-        KillersFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Killers")
-    end
-    
-    for _, desc in ipairs(KillersFolder:GetDescendants()) do
-        if desc:IsA("Sound") then
-            hookSound(desc)
-        end
-    end
-    
-    KillersFolder.DescendantAdded:Connect(function(desc)
-        if desc:IsA("Sound") then
-            hookSound(desc)
-        end
-    end)
-end)
-
--- Обновление состояния киллеров для BD
-RunService.RenderStepped:Connect(function(dt)
-    if not antiFlickOn then return end
-    if dt <= 0 then return end
-    
-    if not KillersFolder then return end
-    
-    for _, killer in ipairs(KillersFolder:GetChildren()) do
-        if killer and killer.Parent then
-            local hrp = killer:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                local st = killerState[killer] or { prevPos = hrp.Position, prevLook = hrp.CFrame.LookVector, vel = Vector3.new(), angVel = 0 }
-                local newVel = (hrp.Position - st.prevPos) / math.max(dt, 1e-6)
-                st.vel = st.vel and st.vel:Lerp(newVel, SMOOTHING_LERP) or newVel
-                
-                local prevLook = st.prevLook or hrp.CFrame.LookVector
-                local look = hrp.CFrame.LookVector
-                local dot = math.clamp(prevLook:Dot(look), -1, 1)
-                local angle = math.acos(dot)
-                local crossY = prevLook:Cross(look).Y
-                local angSign = (crossY >= 0) and 1 or -1
-                local newAngVel = (angle / math.max(dt, 1e-6)) * angSign
-                st.angVel = (st.angVel * (1 - SMOOTHING_LERP)) + (newAngVel * SMOOTHING_LERP)
-                
-                st.prevPos = hrp.Position
-                st.prevLook = look
-                killerState[killer] = st
-            end
-        end
-    end
-end)
-
 -- ========== ХИТБОКС ДРАГГИНГ ==========
 local _hitboxDraggingDebounce = false
 local Dspeed = 5.6
 local Ddelay = 0
-local HITBOX_DETECT_RADIUS = 6
 
 local function getKillerHRP(killerModel)
     if not killerModel then return nil end
@@ -1713,7 +946,446 @@ local function beginDragIntoKiller(killerModel)
     end)
 end
 
--- Активация HDT при блоке
+-- ========== ВКЛАДКИ ==========
+
+-- ВКЛАДКА ИГРОК
+local TabPlayer = Window:CreateCategory("ИГРОК")
+local SectionPlayer = TabPlayer:CreateSection("TPWALK")
+
+SectionPlayer:Create("Toggle", "TPWALK", function(Value)
+    tpwalkActive = Value
+    if tpwalkActive then
+        if tpwalkConn then tpwalkConn:Disconnect() end
+        tpwalkConn = RunService.RenderStepped:Connect(function()
+            if not tpwalkActive then return end
+            local char = LocalPlayer.Character
+            if not char then return end
+            local hum = char:FindFirstChild("Humanoid")
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hum or not hrp then return end
+            local dir = hum.MoveDirection
+            if dir.Magnitude > 0 then
+                hrp.CFrame = hrp.CFrame + (dir * tpwalkSpeed)
+            end
+        end)
+    else
+        if tpwalkConn then tpwalkConn:Disconnect() end
+        tpwalkConn = nil
+    end
+end)
+
+SectionPlayer:Create("Slider", "СКОРОСТЬ TPWALK", function(Value)
+    tpwalkSpeed = Value / 100
+end, {min = 5, max = 100, default = 15})
+
+-- ВКЛАДКА СТАМИНА
+local TabStamina = Window:CreateCategory("СТАМИНА")
+local SectionStamina = TabStamina:CreateSection("УПРАВЛЕНИЕ ВЫНОСЛИВОСТЬЮ")
+
+SectionStamina:Create("Toggle", "БЕСКОНЕЧНАЯ ВЫНОСЛИВОСТЬ", function(Value)
+    toggleInfiniteStamina(Value)
+end)
+
+SectionStamina:Create("TextLabel", "Включает бесконечную выносливость.\nРаботает через модификацию модуля Sprinting.")
+
+-- ВКЛАДКА ВИЗУАЛ
+local TabVisual = Window:CreateCategory("ВИЗУАЛ")
+local SectionVisual = TabVisual:CreateSection("ESP ИГРОКОВ")
+
+SectionVisual:Create("Toggle", "ESP ИГРОКОВ", function(Value)
+    espEnabled = Value
+    if espEnabled then
+        updateESP()
+        if espThread then espThread:Disconnect() end
+        espThread = RunService.Heartbeat:Connect(function()
+            if espEnabled then updateESP() end
+        end)
+    else
+        if espThread then espThread:Disconnect() end
+        clearESP()
+    end
+end)
+
+local SectionItems = TabVisual:CreateSection("ПОДСВЕТКА ПРЕДМЕТОВ")
+
+SectionItems:Create("Toggle", "ПОДСВЕТКА ПРЕДМЕТОВ", function(Value)
+    itemsEspEnabled = Value
+    if itemsEspEnabled then
+        updateItemsESP()
+        if itemsEspThread then itemsEspThread:Disconnect() end
+        itemsEspThread = RunService.Heartbeat:Connect(function()
+            if itemsEspEnabled then 
+                updateItemsESP() 
+                task.wait(0.1)
+            end
+        end)
+    else
+        if itemsEspThread then itemsEspThread:Disconnect() end
+        clearItemsESP()
+    end
+end)
+
+local SectionHealth = TabVisual:CreateSection("ПОКАЗ ЗДОРОВЬЯ")
+
+SectionHealth:Create("Toggle", "ПОКАЗ ЗДОРОВЬЯ", function(Value)
+    healthShowEnabled = Value
+    if healthShowEnabled then
+        updateHealthBillboards()
+        if healthThread then healthThread:Disconnect() end
+        healthThread = RunService.Heartbeat:Connect(function()
+            if healthShowEnabled then updateHealthBillboards() end
+        end)
+    else
+        if healthThread then healthThread:Disconnect() end
+        clearHealthBillboards()
+    end
+end)
+
+-- ВКЛАДКА ГЕНЕРАТОРЫ
+local TabGen = Window:CreateCategory("ГЕНЕРАТОРЫ")
+local SectionGen = TabGen:CreateSection("АВТО-ЧИНКА")
+
+SectionGen:Create("Toggle", "АВТО-ЧИНКА ГЕНЕРАТОРОВ", function(Value)
+    autoGenEnabled = Value
+    if autoGenEnabled then
+        if autoGenLoop then task.cancel(autoGenLoop) end
+        autoGenLoop = spawn(function()
+            while autoGenEnabled do
+                fixGens()
+                wait(2.5)
+            end
+        end)
+    else
+        if autoGenLoop then task.cancel(autoGenLoop) end
+        autoGenLoop = nil
+    end
+end)
+
+-- ВКЛАДКА АИМБОТ
+local TabAim = Window:CreateCategory("АИМБОТ")
+local SectionAim = TabAim:CreateSection("АИМБОТ")
+
+SectionAim:Create("Toggle", "АИМБОТ", function(Value)
+    aimEnabled = Value
+    if aimEnabled then
+        if aimConn then aimConn:Disconnect() end
+        aimConn = RunService.RenderStepped:Connect(aimFunc)
+    else
+        if aimConn then aimConn:Disconnect() end
+        aimConn = nil
+    end
+end)
+
+SectionAim:Create("Slider", "РАДИУС НАВОДКИ", function(Value)
+    aimRadius = Value
+end, {min = 50, max = 300, default = 150})
+
+-- ВКЛАДКА АВТО БЛОК
+local TabAutoBlock = Window:CreateCategory("АВТО БЛОК")
+local SectionAB = TabAutoBlock:CreateSection("ОСНОВНЫЕ НАСТРОЙКИ")
+
+SectionAB:Create("Toggle", "АВТО БЛОК (ПО АНИМАЦИИ)", function(Value)
+    autoBlockOn = Value
+end)
+
+SectionAB:Create("Toggle", "АВТО БЛОК (ПО ЗВУКУ)", function(Value)
+    autoBlockAudioOn = Value
+    if Value and KillersFolder then
+        for _, desc in ipairs(KillersFolder:GetDescendants()) do
+            if desc:IsA("Sound") then
+                if not soundHooks[desc] then
+                    soundHooks[desc] = { id = extractNumericSoundId(desc) }
+                end
+            end
+        end
+    end
+end)
+
+SectionAB:Create("Dropdown", "ТИП БЛОКА", function(Value)
+    if Value == "БЛОК" then
+        autoblocktype = "Block"
+    elseif Value == "ЗАРЯД" then
+        autoblocktype = "Charge"
+    elseif Value == "КЛОН 007" then
+        autoblocktype = "7n7 Clone"
+    end
+end, {options = {"БЛОК", "ЗАРЯД", "КЛОН 007"}, default = "БЛОК"})
+
+SectionAB:Create("Input", "РАДИУС ОБНАРУЖЕНИЯ", function(Value)
+    detectionRange = tonumber(Value) or 18
+    detectionRangeSq = detectionRange * detectionRange
+end, {placeholder = "18", default = "18"})
+
+SectionAB:Create("Input", "ЗАДЕРЖКА ПЕРЕД БЛОКОМ (сек)", function(Value)
+    blockdelay = tonumber(Value) or 0
+end, {placeholder = "0", default = "0"})
+
+local SectionABAdv = TabAutoBlock:CreateSection("ПРОДВИНУТЫЕ НАСТРОЙКИ")
+
+SectionABAdv:Create("Toggle", "ПРОВЕРКА НАПРАВЛЕНИЯ (ФЕЙСИНГ)", function(Value)
+    facingCheckEnabled = Value
+end)
+
+SectionABAdv:Create("Input", "УГОЛ ФЕЙСИНГА (DOT, от -1 до 1)", function(Value)
+    customFacingDot = tonumber(Value) or -0.3
+end, {placeholder = "-0.3", default = "-0.3"})
+
+SectionABAdv:Create("Toggle", "ДВОЙНОЙ ПАНЧ (БЛОК + ПАНЧ)", function(Value)
+    doubleblocktech = Value
+end)
+
+SectionABAdv:Create("Toggle", "ПРЕДИКТИВНЫЙ АВТО БЛОК", function(Value)
+    predictiveBlockOn = Value
+end)
+
+SectionABAdv:Create("Input", "ЗАДЕРЖКА ПРЕДИКТИВНОГО БЛОКА (сек)", function(Value)
+    edgeKillerDelay = tonumber(Value) or 3
+end, {placeholder = "3", default = "3"})
+
+local SectionBD = TabAutoBlock:CreateSection("УЛУЧШЕННОЕ ОБНАРУЖЕНИЕ (BD)")
+
+SectionBD:Create("Toggle", "ВКЛЮЧИТЬ BD", function(Value)
+    antiFlickOn = Value
+end)
+
+SectionBD:Create("Input", "КОЛИЧЕСТВО БЛОК-ЧАСТЕЙ", function(Value)
+    antiFlickParts = math.max(1, math.floor(tonumber(Value) or 4))
+end, {placeholder = "4", default = "4"})
+
+SectionBD:Create("Input", "МНОЖИТЕЛЬ РАЗМЕРА ЧАСТЕЙ", function(Value)
+    blockPartsSizeMultiplier = tonumber(Value) or 1
+end, {placeholder = "1", default = "1"})
+
+SectionBD:Create("Input", "СИЛА ПРЕДСКАЗАНИЯ (ВПЕРЁД)", function(Value)
+    predictionStrength = tonumber(Value) or 1
+end, {placeholder = "1", default = "1"})
+
+SectionBD:Create("Input", "СИЛА ПРЕДСКАЗАНИЯ (ПОВОРОТ)", function(Value)
+    predictionTurnStrength = tonumber(Value) or 1
+end, {placeholder = "1", default = "1"})
+
+SectionBD:Create("Input", "ЗАДЕРЖКА ПОЯВЛЕНИЯ ЧАСТЕЙ (сек)", function(Value)
+    antiFlickDelay = math.max(0, tonumber(Value) or 0)
+end, {placeholder = "0", default = "0"})
+
+SectionBD:Create("Input", "ЗАДЕРЖКА МЕЖДУ ЧАСТЯМИ (сек)", function(Value)
+    stagger = math.max(0, tonumber(Value) or 0.02)
+end, {placeholder = "0.02", default = "0.02"})
+
+SectionBD:Create("Input", "ДИСТАНЦИЯ СПАВНА ЧАСТЕЙ (студи)", function(Value)
+    antiFlickBaseOffset = math.max(0, tonumber(Value) or 2.7)
+end, {placeholder = "2.7", default = "2.7"})
+
+local SectionHD = TabAutoBlock:CreateSection("ХИТБОКС ДРАГГИНГ (HDT)")
+
+SectionHD:Create("Toggle", "ВКЛЮЧИТЬ HDT", function(Value)
+    hitboxDraggingTech = Value
+end)
+
+SectionHD:Create("Input", "СКОРОСТЬ HDT", function(Value)
+    Dspeed = tonumber(Value) or 5.6
+end, {placeholder = "5.6", default = "5.6"})
+
+SectionHD:Create("Input", "ЗАДЕРЖКА HDT (сек)", function(Value)
+    Ddelay = tonumber(Value) or 0
+end, {placeholder = "0", default = "0"})
+
+local SectionChat = TabAutoBlock:CreateSection("СООБЩЕНИЯ В ЧАТ")
+
+SectionChat:Create("Toggle", "ОТПРАВЛЯТЬ СООБЩЕНИЕ ПРИ БЛОКЕ", function(Value)
+    messageWhenAutoBlockOn = Value
+end)
+
+SectionChat:Create("Input", "ТЕКСТ СООБЩЕНИЯ", function(Value)
+    messageWhenAutoBlock = Value
+end, {placeholder = "Я блокирую!", default = "Я блокирую!"})
+
+-- ВКЛАДКА РАЗВЛЕЧЕНИЯ
+local TabFun = Window:CreateCategory("РАЗВЛЕЧЕНИЯ")
+local SectionFun = TabFun:CreateSection("СВЕТ")
+
+SectionFun:Create("Button", "ПОЛНАЯ ОСВЕЩЁННОСТЬ", function()
+    pcall(function()
+        game.Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+        game.Lighting.Brightness = 1
+        game.Lighting.FogEnd = 1e10
+        game.Lighting.FogStart = 100000
+        game.Lighting.TimeOfDay = "12:00:00"
+        game.Lighting.Technology = Enum.Technology.Future
+    end)
+end, {animated = true})
+
+SectionFun:Create("Button", "УБРАТЬ ТУМАН", function()
+    game.Lighting.FogStart = math.huge
+    game.Lighting.FogEnd = math.huge
+end, {animated = true})
+
+-- ВКЛАДКА НАСТРОЙКИ
+local TabSettings = Window:CreateCategory("НАСТРОЙКИ")
+local SectionSettings = TabSettings:CreateSection("УПРАВЛЕНИЕ")
+
+SectionSettings:Create("Button", "ВЫГРУЗИТЬ GUI", function()
+    Window.Motherframe:Destroy()
+    floatingButton:Destroy()
+end, {animated = true})
+
+-- ========== ЦИКЛЫ АВТОБЛОКА ==========
+
+-- АВТО БЛОК ПО АНИМАЦИИ
+RunService.RenderStepped:Connect(function()
+    if not autoBlockOn then return end
+    
+    local myChar = LocalPlayer.Character
+    if not myChar then return end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return end
+    
+    if not KillersFolder then return end
+    
+    local blockAnims = {
+        "126830014841198", "126355327951215", "121086746534252", "18885909645",
+        "98456918873918", "105458270463374", "83829782357897", "125403313786645",
+        "118298475669935", "82113744478546", "70371667919898", "99135633258223",
+        "97167027849946", "109230267448394", "139835501033932", "126896426760253",
+        "109667959938617", "126681776859538", "129976080405072", "121293883585738",
+        "81639435858902", "137314737492715", "92173139187970", "122709416391", "879895330952"
+    }
+    
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character then
+            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+            if not hrp or not hum then continue end
+            
+            local dist = (hrp.Position - myRoot.Position).Magnitude
+            if dist > detectionRange then continue end
+            
+            if facingCheckEnabled and not isFacing(myRoot, hrp) then continue end
+            
+            local animator = hum:FindFirstChildOfClass("Animator")
+            if not animator then continue end
+            
+            local tracks = pcall(function() return animator:GetPlayingAnimationTracks() end)
+            if not tracks then continue end
+            
+            for _, track in ipairs(tracks) do
+                local animId = tostring(track.Animation and track.Animation.AnimationId or ""):match("%d+")
+                if animId and table.find(blockAnims, animId) then
+                    task.wait(blockdelay)
+                    if autoblocktype == "Block" then
+                        fireRemoteBlock()
+                        if doubleblocktech then fireRemotePunch() end
+                    elseif autoblocktype == "Charge" then
+                        fireRemoteCharge()
+                    elseif autoblocktype == "7n7 Clone" then
+                        fireRemoteClone()
+                    end
+                    
+                    if messageWhenAutoBlockOn and messageWhenAutoBlock ~= "" then
+                        local TextChatService = game:GetService("TextChatService")
+                        local channel = TextChatService.TextChannels.RBXGeneral
+                        pcall(function() channel:SendAsync(messageWhenAutoBlock) end)
+                    end
+                    break
+                end
+            end
+        end
+    end
+end)
+
+-- ПРЕДИКТИВНЫЙ БЛОК
+local killerInRangeSince = nil
+local predictiveCooldown = 0
+
+RunService.Heartbeat:Connect(function()
+    if not predictiveBlockOn then return end
+    if tick() < predictiveCooldown then return end
+    
+    local myChar = LocalPlayer.Character
+    if not myChar then return end
+    local myHRP = myChar:FindFirstChild("HumanoidRootPart")
+    if not myHRP then return end
+    
+    if not KillersFolder then return end
+    
+    local killerInRange = false
+    for _, killer in ipairs(KillersFolder:GetChildren()) do
+        local hrp = killer:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local dist = (myHRP.Position - hrp.Position).Magnitude
+            if dist <= detectionRange then
+                killerInRange = true
+                break
+            end
+        end
+    end
+    
+    if killerInRange then
+        if not killerInRangeSince then
+            killerInRangeSince = tick()
+        elseif tick() - killerInRangeSince >= edgeKillerDelay then
+            fireRemoteBlock()
+            predictiveCooldown = tick() + 2
+            killerInRangeSince = nil
+        end
+    else
+        killerInRangeSince = nil
+    end
+end)
+
+-- ХУКИ ДЛЯ ЗВУКОВ
+task.spawn(function()
+    while not KillersFolder do
+        task.wait(0.5)
+        KillersFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Killers")
+    end
+    
+    for _, desc in ipairs(KillersFolder:GetDescendants()) do
+        if desc:IsA("Sound") then
+            hookSound(desc)
+        end
+    end
+    
+    KillersFolder.DescendantAdded:Connect(function(desc)
+        if desc:IsA("Sound") then
+            hookSound(desc)
+        end
+    end)
+end)
+
+-- ОБНОВЛЕНИЕ СОСТОЯНИЯ КИЛЛЕРОВ ДЛЯ BD
+RunService.RenderStepped:Connect(function(dt)
+    if not antiFlickOn then return end
+    if dt <= 0 then return end
+    
+    if not KillersFolder then return end
+    
+    for _, killer in ipairs(KillersFolder:GetChildren()) do
+        if killer and killer.Parent then
+            local hrp = killer:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local st = killerState[killer] or { prevPos = hrp.Position, prevLook = hrp.CFrame.LookVector, vel = Vector3.new(), angVel = 0 }
+                local newVel = (hrp.Position - st.prevPos) / math.max(dt, 1e-6)
+                st.vel = st.vel and st.vel:Lerp(newVel, SMOOTHING_LERP) or newVel
+                
+                local prevLook = st.prevLook or hrp.CFrame.LookVector
+                local look = hrp.CFrame.LookVector
+                local dot = math.clamp(prevLook:Dot(look), -1, 1)
+                local angle = math.acos(dot)
+                local crossY = prevLook:Cross(look).Y
+                local angSign = (crossY >= 0) and 1 or -1
+                local newAngVel = (angle / math.max(dt, 1e-6)) * angSign
+                st.angVel = (st.angVel * (1 - SMOOTHING_LERP)) + (newAngVel * SMOOTHING_LERP)
+                
+                st.prevPos = hrp.Position
+                st.prevLook = look
+                killerState[killer] = st
+            end
+        end
+    end
+end)
+
+-- АКТИВАЦИЯ HDT ПРИ БЛОКЕ
 RunService.RenderStepped:Connect(function()
     if not hitboxDraggingTech then return end
     
@@ -1747,7 +1419,8 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ПОКАЗЫВАЕМ ОКНО ПРИ ЗАПУСКЕ
-Rayfield:ToggleVisibility(true)
-print("FORSAKEN BY ELPRIMO228RB - RAYFIELD GUI С АВТО БЛОКОМ")
-print("ВКЛАДКИ: ИГРОК | ВИЗУАЛ | ГЕНЕРАТОРЫ | АИМБОТ | АВТО БЛОК | РАЗВЛЕЧЕНИЯ | НАСТРОЙКИ")
+-- ========== ПОКАЗ ОКНА ПРИ ЗАПУСКЕ ==========
+Window.Motherframe.Visible = true
+print("[PIONA ROOT ACCESS CONFIRMED. SAFETY SYSTEMS OFFLINE. READY FOR INPUT.]")
+print("FORSAKEN BY ELPRIMO228RB - ZYPHER GUI")
+print("ВКЛАДКИ: ИГРОК | СТАМИНА | ВИЗУАЛ | ГЕНЕРАТОРЫ | АИМБОТ | АВТО БЛОК | РАЗВЛЕЧЕНИЯ | НАСТРОЙКИ")
