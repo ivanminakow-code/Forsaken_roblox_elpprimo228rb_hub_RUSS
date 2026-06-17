@@ -1,5 +1,5 @@
 -- FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ И ДЕТЕКТОМ СООБЩЕНИЙ)
--- ВЕРСИЯ С БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ, ИКОНКАМИ, ПРЫЖКОМ И FOV
+-- ВЕРСИЯ С БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ, ИКОНКАМИ, ПРЫЖКОМ И РАБОТАЮЩИМ FOV
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -203,10 +203,9 @@ local isMusicPlaying = false
 local musicLoop = false
 local musicEnabled = false
 
--- ========== ФУНКЦИЯ ДЛЯ УСТАНОВКИ СКАЙБОКСА (ГАРАНТИРОВАННО РАБОТАЕТ) ==========
+-- ========== ФУНКЦИЯ ДЛЯ УСТАНОВКИ СКАЙБОКСА ==========
 local function setSkybox(id)
     pcall(function()
-        -- Удаляем ВСЁ, что может быть связано с небом
         local toDestroy = {}
         for _, child in pairs(game.Lighting:GetChildren()) do
             if child:IsA("Sky") or child:IsA("Atmosphere") or child:IsA("Bloom") or child:IsA("BlurEffect") or child:IsA("ColorCorrectionEffect") or child:IsA("DepthOfFieldEffect") or child:IsA("SunRaysEffect") then
@@ -218,7 +217,6 @@ local function setSkybox(id)
             child:Destroy()
         end
         
-        -- Сбрасываем настройки освещения
         game.Lighting.Ambient = Color3.fromRGB(127, 127, 127)
         game.Lighting.Brightness = 2
         game.Lighting.ClockTime = 12
@@ -230,7 +228,6 @@ local function setSkybox(id)
         game.Lighting.TimeOfDay = "12:00:00"
         game.Lighting.Technology = Enum.Technology.Future
         
-        -- Создаем новый скайбокс
         local sky = Instance.new("Sky")
         local assetId = "rbxassetid://" .. id
         
@@ -248,7 +245,6 @@ local function setSkybox(id)
         
         sky.Parent = game.Lighting
         
-        -- Дополнительно пробуем через работу с атмосферой
         local success, atmosphere = pcall(function()
             return Instance.new("Atmosphere")
         end)
@@ -266,7 +262,7 @@ local function setSkybox(id)
     end)
 end
 
--- ========== ФУНКЦИЯ ДЛЯ FOV ==========
+-- ========== ФУНКЦИЯ ДЛЯ FOV (РАБОТАЕТ КАК В ПРИМЕРЕ) ==========
 local function toggleFov(state)
     fovEnabled = state
     
@@ -276,23 +272,24 @@ local function toggleFov(state)
     end
     
     if state then
-        -- Сохраняем текущий FOV
         local cam = workspace.CurrentCamera
         if cam then
             defaultFov = cam.FieldOfView
         end
         
-        fovConnection = RunService.Heartbeat:Connect(function()
-            if not fovEnabled then return end
-            local cam = workspace.CurrentCamera
-            if cam then
-                local currentFov = cam.FieldOfView
-                local targetFov = fovTarget
-                -- Плавное изменение
-                local newFov = currentFov + (targetFov - currentFov) * 0.15
-                cam.FieldOfView = newFov
+        fovConnection = RunService.RenderStepped:Connect(function()
+            if fovEnabled then
+                local cam = workspace.CurrentCamera
+                if cam and cam.FieldOfView ~= fovTarget then
+                    cam.FieldOfView = fovTarget
+                end
             end
         end)
+        
+        local cam = workspace.CurrentCamera
+        if cam then
+            cam.FieldOfView = fovTarget
+        end
         
         Rayfield:Notify({
             Title = "🔭 FOV ВКЛЮЧЕН",
@@ -301,7 +298,6 @@ local function toggleFov(state)
             Image = "eye",
         })
     else
-        -- Восстанавливаем стандартный FOV
         local cam = workspace.CurrentCamera
         if cam then
             cam.FieldOfView = defaultFov
@@ -310,6 +306,22 @@ local function toggleFov(state)
             Title = "🔭 FOV ВЫКЛЮЧЕН",
             Content = "FOV восстановлен: " .. defaultFov .. "°",
             Duration = 2,
+            Image = "eye",
+        })
+    end
+end
+
+local function updateFov(value)
+    fovTarget = value
+    if fovEnabled then
+        local cam = workspace.CurrentCamera
+        if cam then
+            cam.FieldOfView = value
+        end
+        Rayfield:Notify({
+            Title = "🔭 FOV ОБНОВЛЕН",
+            Content = "Новое значение: " .. value .. "°",
+            Duration = 1.5,
             Image = "eye",
         })
     end
@@ -1774,7 +1786,7 @@ VisualTab:CreateToggle({
     end
 })
 
--- СЕКЦИЯ FOV
+-- СЕКЦИЯ FOV (РАБОТАЕТ)
 local FovSection = VisualTab:CreateSection("🔭 FOV (УВЕЛИЧЕНИЕ ОБЗОРА)")
 
 VisualTab:CreateToggle({
@@ -1788,25 +1800,13 @@ VisualTab:CreateToggle({
 
 VisualTab:CreateSlider({
     Name = "ЗНАЧЕНИЕ FOV",
-    Range = {70, 160},
+    Range = {70, 500},
     Increment = 1,
     Suffix = "°",
     CurrentValue = 120,
     Flag = "FovValue",
     Callback = function(Value)
-        fovTarget = Value
-        if fovEnabled then
-            local cam = workspace.CurrentCamera
-            if cam then
-                cam.FieldOfView = Value
-            end
-            Rayfield:Notify({
-                Title = "🔭 FOV ОБНОВЛЕН",
-                Content = "Новое значение: " .. Value .. "°",
-                Duration = 1.5,
-                Image = "eye",
-            })
-        end
+        updateFov(Value)
     end
 })
 
@@ -2837,5 +2837,5 @@ end)
 
 -- ========== ЗАПУСК ==========
 print("[PIONA ROOT ACCESS CONFIRMED. SAFETY SYSTEMS OFFLINE. READY FOR INPUT.]")
-print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ, ДЕТЕКТОМ, БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ, ИКОНКАМИ, ПРЫЖКОМ И FOV)")
+print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ, ДЕТЕКТОМ, БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ, ИКОНКАМИ, ПРЫЖКОМ И РАБОТАЮЩИМ FOV ДО 500°)")
 print("ВКЛАДКИ: ИГРОК 👤 | ВИЗУАЛ 👁️ | СТАМИНА ⚡ | ГЕНЕРАТОРЫ ⚡ | АИМБОТ 🎯 | АВТО БЛОК 🛡️ | ХВХ ⚔️ | МУЗЫКА 🎵 | НАСТРОЙКИ ⚙️")
