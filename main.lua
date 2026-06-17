@@ -1,5 +1,5 @@
 -- FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ И ДЕТЕКТОМ СООБЩЕНИЙ)
--- ВЕРСИЯ С БОГЛМС (БЕЗ GOTO/GOT) - ИСПРАВЛЕНА ОШИБКА С КИРИЛЛИЦЕЙ
+-- ВЕРСИЯ С БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ И ФЛАЕМ (БЕЗ GOTO/GOT)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -109,6 +109,16 @@ local healthShowEnabled = false
 local healthThread = nil
 local healthBillboards = {}
 
+-- ========== НОКЛИП И ФЛАЙ ПЕРЕМЕННЫЕ ==========
+local noclipEnabled = false
+local noclipConnection = nil
+
+local flyEnabled = false
+local flySpeed = 50
+local flyConnection = nil
+local flyBodyVelocity = nil
+local flyBodyGyro = nil
+
 -- ========== СТАМИНА ==========
 local infiniteStaminaEnabled = false
 local staminaConnection = nil
@@ -171,13 +181,21 @@ local kickOnDetection = true
 local detectionCooldown = 0
 local lastDetectionTime = 0
 
--- ========== БОГЛМС ПЕРЕМЕННЫЕ (ИСПРАВЛЕНО) ==========
+-- ========== БОГЛМС ПЕРЕМЕННЫЕ ==========
 local godlmcEnabled = false
 local godlmcThread = nil
 local godlmcTeleportConn = nil
 local godlmcCheckInterval = 0.5
 local teleportHeight = 1000
 local teleportInterval = 0.1
+
+-- ========== МУЗЫКАЛЬНЫЙ ПЛЕЕР ПЕРЕМЕННЫЕ ==========
+local musicSound = nil
+local musicVolume = 50
+local currentMusicId = "74326888232570"
+local isMusicPlaying = false
+local musicLoop = false
+local musicEnabled = false
 
 -- ========== ФУНКЦИИ REMOTE ==========
 local function fireRemoteBlock()
@@ -240,7 +258,175 @@ local function toggleInfiniteStamina(state)
     end
 end
 
--- ========== ФУНКЦИИ БОГЛМС (ИСПРАВЛЕНО) ==========
+-- ========== ФУНКЦИИ НОКЛИПА ==========
+local function toggleNoclip(state)
+    noclipEnabled = state
+    
+    if noclipConnection then
+        noclipConnection:Disconnect()
+        noclipConnection = nil
+    end
+    
+    if state then
+        noclipConnection = RunService.Heartbeat:Connect(function()
+            if not noclipEnabled then return end
+            local char = LocalPlayer.Character
+            if not char then return end
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end)
+        Rayfield:Notify({
+            Title = "🚫 НОКЛИП ВКЛЮЧЕН",
+            Content = "Вы можете проходить сквозь стены! (МОЖЕТЕ ПОЛУЧИТЬ БАН)",
+            Duration = 3,
+            Image = nil,
+        })
+    else
+        local char = LocalPlayer.Character
+        if char then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+        Rayfield:Notify({
+            Title = "🚫 НОКЛИП ВЫКЛЮЧЕН",
+            Content = "Коллизия восстановлена",
+            Duration = 2,
+            Image = nil,
+        })
+    end
+end
+
+-- ========== ФУНКЦИИ ФЛАЯ ==========
+local function toggleFly(state)
+    flyEnabled = state
+    
+    if flyConnection then
+        flyConnection:Disconnect()
+        flyConnection = nil
+    end
+    
+    if flyBodyVelocity then
+        flyBodyVelocity:Destroy()
+        flyBodyVelocity = nil
+    end
+    
+    if flyBodyGyro then
+        flyBodyGyro:Destroy()
+        flyBodyGyro = nil
+    end
+    
+    if state then
+        local char = LocalPlayer.Character
+        if not char then
+            Rayfield:Notify({
+                Title = "❌ ОШИБКА",
+                Content = "Персонаж не найден!",
+                Duration = 2,
+                Image = nil,
+            })
+            flyEnabled = false
+            return
+        end
+        
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hrp or not hum then
+            Rayfield:Notify({
+                Title = "❌ ОШИБКА",
+                Content = "HumanoidRootPart или Humanoid не найден!",
+                Duration = 2,
+                Image = nil,
+            })
+            flyEnabled = false
+            return
+        end
+        
+        local oldWalkSpeed = hum.WalkSpeed
+        local oldJumpPower = hum.JumpPower
+        
+        flyBodyVelocity = Instance.new("BodyVelocity")
+        flyBodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+        flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        flyBodyVelocity.Parent = hrp
+        
+        flyBodyGyro = Instance.new("BodyGyro")
+        flyBodyGyro.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+        flyBodyGyro.D = 500
+        flyBodyGyro.P = 5000
+        flyBodyGyro.CFrame = hrp.CFrame
+        flyBodyGyro.Parent = hrp
+        
+        hum.PlatformStand = true
+        hum.WalkSpeed = 0
+        hum.JumpPower = 0
+        
+        flyConnection = RunService.Heartbeat:Connect(function()
+            if not flyEnabled or not hrp or not hrp.Parent then
+                return
+            end
+            
+            local moveVector = Vector3.new(0, 0, 0)
+            local camera = workspace.CurrentCamera
+            if not camera then return end
+            
+            local forward = camera.CFrame.LookVector
+            local right = camera.CFrame.RightVector
+            local up = camera.CFrame.UpVector
+            
+            local forwardInput = UserInputService:IsKeyDown(Enum.KeyCode.W) and 1 or 0
+            local backwardInput = UserInputService:IsKeyDown(Enum.KeyCode.S) and 1 or 0
+            local leftInput = UserInputService:IsKeyDown(Enum.KeyCode.A) and 1 or 0
+            local rightInput = UserInputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0
+            local upInput = UserInputService:IsKeyDown(Enum.KeyCode.Space) and 1 or 0
+            local downInput = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) and 1 or 0
+            
+            moveVector = (forward * (forwardInput - backwardInput) * flySpeed)
+            moveVector = moveVector + (right * (rightInput - leftInput) * flySpeed)
+            moveVector = moveVector + (up * (upInput - downInput) * flySpeed)
+            
+            if moveVector.Magnitude > 0 then
+                flyBodyVelocity.Velocity = moveVector
+            else
+                flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            end
+            
+            if moveVector.Magnitude > 0.1 then
+                flyBodyGyro.CFrame = CFrame.new(hrp.Position, hrp.Position + moveVector.Unit)
+            end
+        end)
+        
+        Rayfield:Notify({
+            Title = "✈️ ФЛАЙ ВКЛЮЧЕН",
+            Content = "Управление: WASD - движение, Пробел - вверх, Shift - вниз (МОЖЕТЕ ПОЛУЧИТЬ БАН)",
+            Duration = 4,
+            Image = nil,
+        })
+    else
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.PlatformStand = false
+                hum.WalkSpeed = 16
+                hum.JumpPower = 50
+            end
+        end
+        Rayfield:Notify({
+            Title = "✈️ ФЛАЙ ВЫКЛЮЧЕН",
+            Content = "Режим полета отключен",
+            Duration = 2,
+            Image = nil,
+        })
+    end
+end
+
+-- ========== ФУНКЦИИ БОГЛМС ==========
 local function isLastSurvivor()
     local survivorsFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Survivors")
     if not survivorsFolder then return false end
@@ -281,7 +467,6 @@ end
 local function godlmcLoop()
     while godlmcEnabled do
         if isLastSurvivor() then
-            -- Запускаем телепортацию
             if not godlmcTeleportConn then
                 godlmcTeleportConn = RunService.Heartbeat:Connect(function()
                     if not godlmcEnabled then
@@ -297,7 +482,6 @@ local function godlmcLoop()
                 end)
             end
             
-            -- Ждём пока условие изменится
             while godlmcEnabled and isLastSurvivor() do
                 task.wait(godlmcCheckInterval)
             end
@@ -334,6 +518,99 @@ local function toggleGodlmc(state)
             Duration = 3,
             Image = nil,
         })
+    end
+end
+
+-- ========== МУЗЫКАЛЬНЫЙ ПЛЕЕР ФУНКЦИИ ==========
+local function playMusic(musicId)
+    if musicSound then
+        musicSound:Stop()
+        musicSound:Destroy()
+        musicSound = nil
+    end
+    
+    musicSound = Instance.new("Sound")
+    musicSound.SoundId = "rbxassetid://" .. musicId
+    musicSound.Volume = musicVolume / 100
+    musicSound.Looped = musicLoop
+    musicSound.Parent = LocalPlayer.Character or workspace
+    
+    musicSound:Play()
+    isMusicPlaying = true
+    musicEnabled = true
+    
+    Rayfield:Notify({
+        Title = "🎵 МУЗЫКА ИГРАЕТ",
+        Content = "ID: " .. musicId,
+        Duration = 2,
+        Image = nil,
+    })
+    
+    musicSound.Stopped:Connect(function()
+        if not musicLoop and not musicSound.IsPlaying then
+            isMusicPlaying = false
+        end
+    end)
+end
+
+local function stopMusic()
+    if musicSound then
+        musicSound:Stop()
+        musicSound:Destroy()
+        musicSound = nil
+    end
+    isMusicPlaying = false
+    musicEnabled = false
+    Rayfield:Notify({
+        Title = "⏹ МУЗЫКА ОСТАНОВЛЕНА",
+        Content = "Воспроизведение остановлено",
+        Duration = 2,
+        Image = nil,
+    })
+end
+
+local function toggleMusicPlay()
+    if musicSound then
+        if isMusicPlaying then
+            musicSound:Pause()
+            isMusicPlaying = false
+            Rayfield:Notify({
+                Title = "⏸ ПАУЗА",
+                Content = "Музыка на паузе",
+                Duration = 1.5,
+                Image = nil,
+            })
+        else
+            musicSound:Play()
+            isMusicPlaying = true
+            Rayfield:Notify({
+                Title = "▶ ВОСПРОИЗВЕДЕНИЕ",
+                Content = "Музыка продолжается",
+                Duration = 1.5,
+                Image = nil,
+            })
+        end
+    else
+        playMusic(currentMusicId)
+    end
+end
+
+local function toggleMusicLoop()
+    musicLoop = not musicLoop
+    if musicSound then
+        musicSound.Looped = musicLoop
+    end
+    Rayfield:Notify({
+        Title = "🔄 ПОВТОР",
+        Content = musicLoop and "Включен" or "Выключен",
+        Duration = 1.5,
+        Image = nil,
+    })
+end
+
+local function updateMusicVolume()
+    if musicSound then
+        musicSound.Volume = musicVolume / 100
     end
 end
 
@@ -1171,6 +1448,7 @@ end
 
 -- ВКЛАДКА ИГРОК
 local PlayerTab = Window:CreateTab("ИГРОК", nil)
+
 local PlayerSection = PlayerTab:CreateSection("TPWALK")
 
 PlayerTab:CreateToggle({
@@ -1212,7 +1490,40 @@ PlayerTab:CreateSlider({
     end
 })
 
--- ВКЛАДКА СТАМИНА
+-- СЕКЦИЯ НОКЛИП И ФЛАЙ
+local FlySection = PlayerTab:CreateSection("⚠️ ОПАСНЫЕ ФУНКЦИИ (МОЖЕТЕ ПОЛУЧИТЬ БАН)")
+
+PlayerTab:CreateToggle({
+    Name = "НОКЛИП (МОЖЕТЕ ПОЛУЧИТЬ БАН)",
+    CurrentValue = false,
+    Flag = "NoclipToggle",
+    Callback = function(Value)
+        toggleNoclip(Value)
+    end
+})
+
+PlayerTab:CreateToggle({
+    Name = "ФЛАЙ (МОЖЕТЕ ПОЛУЧИТЬ БАН)",
+    CurrentValue = false,
+    Flag = "FlyToggle",
+    Callback = function(Value)
+        toggleFly(Value)
+    end
+})
+
+PlayerTab:CreateSlider({
+    Name = "СКОРОСТЬ ФЛАЯ",
+    Range = {10, 200},
+    Increment = 5,
+    Suffix = "Studs/s",
+    CurrentValue = 50,
+    Flag = "FlySpeed",
+    Callback = function(Value)
+        flySpeed = Value
+    end
+})
+
+-- ========== ВКЛАДКА СТАМИНА ==========
 local StaminaTab = Window:CreateTab("СТАМИНА", nil)
 local StaminaSection = StaminaTab:CreateSection("УПРАВЛЕНИЕ ВЫНОСЛИВОСТЬЮ")
 
@@ -1225,8 +1536,9 @@ StaminaTab:CreateToggle({
     end
 })
 
--- ВКЛАДКА ВИЗУАЛ
+-- ========== ВКЛАДКА ВИЗУАЛ ==========
 local VisualTab = Window:CreateTab("ВИЗУАЛ", nil)
+
 local VisualSection = VisualTab:CreateSection("ESP ИГРОКОВ")
 
 VisualTab:CreateToggle({
@@ -1293,7 +1605,107 @@ VisualTab:CreateToggle({
     end
 })
 
--- ВКЛАДКА ГЕНЕРАТОРЫ
+-- СЕКЦИЯ ОСВЕЩЕНИЯ И ТУМАНА
+local LightingSection = VisualTab:CreateSection("💡 ОСВЕЩЕНИЕ И ТУМАН")
+
+VisualTab:CreateButton({
+    Name = "ПОЛНАЯ ОСВЕЩЁННОСТЬ",
+    Callback = function()
+        pcall(function()
+            game.Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+            game.Lighting.Brightness = 1
+            game.Lighting.FogEnd = 1e10
+            game.Lighting.FogStart = 100000
+            game.Lighting.TimeOfDay = "12:00:00"
+            game.Lighting.Technology = Enum.Technology.Future
+        end)
+        Rayfield:Notify({
+            Title = "💡 ОСВЕЩЕНИЕ",
+            Content = "Полная освещённость активирована!",
+            Duration = 2,
+            Image = nil,
+        })
+    end
+})
+
+VisualTab:CreateButton({
+    Name = "УБРАТЬ ТУМАН",
+    Callback = function()
+        game.Lighting.FogStart = math.huge
+        game.Lighting.FogEnd = math.huge
+        Rayfield:Notify({
+            Title = "🌫️ ТУМАН УБРАН",
+            Content = "Туман полностью отключен!",
+            Duration = 2,
+            Image = nil,
+        })
+    end
+})
+
+VisualTab:CreateButton({
+    Name = "ЗАМЕНИТЬ СКАЙБОКС (Calm Sky)",
+    Callback = function()
+        pcall(function()
+            local sky = Instance.new("Sky")
+            sky.SkyboxBk = "rbxassetid://26558842"
+            sky.SkyboxDn = "rbxassetid://26558842"
+            sky.SkyboxFt = "rbxassetid://26558842"
+            sky.SkyboxLf = "rbxassetid://26558842"
+            sky.SkyboxRt = "rbxassetid://26558842"
+            sky.SkyboxUp = "rbxassetid://26558842"
+            sky.Parent = game.Lighting
+            
+            -- Удаляем старый скайбокс если есть
+            for _, child in pairs(game.Lighting:GetChildren()) do
+                if child:IsA("Sky") and child ~= sky then
+                    child:Destroy()
+                end
+            end
+        end)
+        Rayfield:Notify({
+            Title = "🌤️ СКАЙБОКС ЗАМЕНЕН",
+            Content = "Установлен скайбокс Calm Sky!",
+            Duration = 2,
+            Image = nil,
+        })
+    end
+})
+
+VisualTab:CreateInput({
+    Name = "ID СКАЙБОКСА",
+    CurrentValue = "26558842",
+    PlaceholderText = "Введите ID скайбокса",
+    Flag = "SkyboxId",
+    Callback = function(Value)
+        if Value ~= "" then
+            pcall(function()
+                local sky = Instance.new("Sky")
+                local id = Value
+                sky.SkyboxBk = "rbxassetid://" .. id
+                sky.SkyboxDn = "rbxassetid://" .. id
+                sky.SkyboxFt = "rbxassetid://" .. id
+                sky.SkyboxLf = "rbxassetid://" .. id
+                sky.SkyboxRt = "rbxassetid://" .. id
+                sky.SkyboxUp = "rbxassetid://" .. id
+                sky.Parent = game.Lighting
+                
+                for _, child in pairs(game.Lighting:GetChildren()) do
+                    if child:IsA("Sky") and child ~= sky then
+                        child:Destroy()
+                    end
+                end
+            end)
+            Rayfield:Notify({
+                Title = "🌤️ СКАЙБОКС ЗАМЕНЕН",
+                Content = "ID: " .. Value,
+                Duration = 2,
+                Image = nil,
+            })
+        end
+    end
+})
+
+-- ========== ВКЛАДКА ГЕНЕРАТОРЫ ==========
 local GenTab = Window:CreateTab("ГЕНЕРАТОРЫ", nil)
 local GenSection = GenTab:CreateSection("АВТО-ЧИНКА")
 
@@ -1318,7 +1730,7 @@ GenTab:CreateToggle({
     end
 })
 
--- ВКЛАДКА АИМБОТ
+-- ========== ВКЛАДКА АИМБОТ ==========
 local AimTab = Window:CreateTab("АИМБОТ", nil)
 local AimSection = AimTab:CreateSection("АИМБОТ")
 
@@ -1350,7 +1762,7 @@ AimTab:CreateSlider({
     end
 })
 
--- ВКЛАДКА АВТО БЛОК
+-- ========== ВКЛАДКА АВТО БЛОК ==========
 local AutoBlockTab = Window:CreateTab("АВТО БЛОК", nil)
 local SectionAB = AutoBlockTab:CreateSection("ОСНОВНЫЕ НАСТРОЙКИ")
 
@@ -1600,37 +2012,73 @@ AutoBlockTab:CreateInput({
     end
 })
 
--- ========== ВКЛАДКА РАЗВЛЕЧЕНИЯ ==========
-local FunTab = Window:CreateTab("РАЗВЛЕЧЕНИЯ", nil)
+-- ========== ВКЛАДКА ХВХ (БЫВШИЕ РАЗВЛЕЧЕНИЯ) ==========
+local HvHTab = Window:CreateTab("ХВХ", nil)
 
-local FunSection = FunTab:CreateSection("СВЕТ")
+-- БОГЛМС СЕКЦИЯ
+local GodSection = HvHTab:CreateSection("👑 БОГЛМС - ПОСЛЕДНИЙ ВЫЖИВШИЙ")
 
-FunTab:CreateButton({
-    Name = "ПОЛНАЯ ОСВЕЩЁННОСТЬ",
-    Callback = function()
-        pcall(function()
-            game.Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-            game.Lighting.Brightness = 1
-            game.Lighting.FogEnd = 1e10
-            game.Lighting.FogStart = 100000
-            game.Lighting.TimeOfDay = "12:00:00"
-            game.Lighting.Technology = Enum.Technology.Future
-        end)
+HvHTab:CreateToggle({
+    Name = "ВКЛЮЧИТЬ БОГЛМС",
+    CurrentValue = false,
+    Flag = "GodlmcToggle",
+    Callback = function(Value)
+        toggleGodlmc(Value)
     end
 })
 
-FunTab:CreateButton({
-    Name = "УБРАТЬ ТУМАН",
-    Callback = function()
-        game.Lighting.FogStart = math.huge
-        game.Lighting.FogEnd = math.huge
+HvHTab:CreateInput({
+    Name = "ВЫСОТА ТЕЛЕПОРТА (студи)",
+    CurrentValue = "1000",
+    PlaceholderText = "1000",
+    Flag = "TeleportHeight",
+    Callback = function(Value)
+        teleportHeight = tonumber(Value) or 1000
+        if teleportHeight < 10 then teleportHeight = 10 end
     end
 })
 
--- ========== SLIDE BUTTON ==========
-local SlideSection = FunTab:CreateSection("ДВИЖЕНИЕ")
+HvHTab:CreateSlider({
+    Name = "ИНТЕРВАЛ ТЕЛЕПОРТА (сек)",
+    Range = {0.05, 0.5},
+    Increment = 0.01,
+    Suffix = "сек",
+    CurrentValue = 0.1,
+    Flag = "TeleportInterval",
+    Callback = function(Value)
+        teleportInterval = Value
+    end
+})
 
-FunTab:CreateButton({
+HvHTab:CreateSlider({
+    Name = "ИНТЕРВАЛ ПРОВЕРКИ (сек)",
+    Range = {0.1, 2.0},
+    Increment = 0.1,
+    Suffix = "сек",
+    CurrentValue = 0.5,
+    Flag = "CheckInterval",
+    Callback = function(Value)
+        godlmcCheckInterval = Value
+    end
+})
+
+HvHTab:CreateButton({
+    Name = "ТЕЛЕПОРТНУТЬСЯ ВВЕРХ (ТЕСТ)",
+    Callback = function()
+        teleportUp()
+        Rayfield:Notify({
+            Title = "🚀 ТЕЛЕПОРТ",
+            Content = "Телепорт вверх на " .. teleportHeight .. " студий",
+            Duration = 2,
+            Image = nil,
+        })
+    end
+})
+
+-- SLIDE BUTTON
+local SlideSection = HvHTab:CreateSection("ДВИЖЕНИЕ")
+
+HvHTab:CreateButton({
     Name = "СЛАЙД (ПОЕЗДКА ВПЕРЕД)",
     Callback = function()
         local playerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -1675,10 +2123,10 @@ FunTab:CreateButton({
     end
 })
 
--- ========== TP HIT ==========
-local TPHitSection = FunTab:CreateSection("TP HIT")
+-- TP HIT
+local TPHitSection = HvHTab:CreateSection("TP HIT")
 
-FunTab:CreateToggle({
+HvHTab:CreateToggle({
     Name = "TP HIT (ТЕЛЕПОРТ ПРИ УДАРЕ)",
     CurrentValue = false,
     Flag = "TPHitToggle",
@@ -1701,7 +2149,7 @@ FunTab:CreateToggle({
     end
 })
 
-FunTab:CreateSlider({
+HvHTab:CreateSlider({
     Name = "РАДИУС TP HIT",
     Range = {10, 100},
     Increment = 5,
@@ -1713,7 +2161,7 @@ FunTab:CreateSlider({
     end
 })
 
-FunTab:CreateSlider({
+HvHTab:CreateSlider({
     Name = "ДЛИТЕЛЬНОСТЬ TP (сек)",
     Range = {0.05, 1.0},
     Increment = 0.05,
@@ -1725,61 +2173,92 @@ FunTab:CreateSlider({
     end
 })
 
--- ========== ВКЛАДКА БОГЛМС (ИСПРАВЛЕНО) ==========
-local GodTab = Window:CreateTab("БОГЛМС", nil)
-local GodSection = GodTab:CreateSection("РЕЖИМ БОГА - ПОСЛЕДНИЙ ВЫЖИВШИЙ")
+-- ========== ВКЛАДКА МУЗЫКА ==========
+local MusicTab = Window:CreateTab("МУЗЫКА", nil)
 
-GodTab:CreateToggle({
-    Name = "ВКЛЮЧИТЬ БОГЛМС",
-    CurrentValue = false,
-    Flag = "GodlmcToggle",
+local MusicSection = MusicTab:CreateSection("🎵 МУЗЫКАЛЬНЫЙ ПЛЕЕР")
+
+MusicTab:CreateInput({
+    Name = "ID МУЗЫКИ (rbxassetid)",
+    CurrentValue = "74326888232570",
+    PlaceholderText = "Введите ID аудио",
+    Flag = "MusicId",
     Callback = function(Value)
-        toggleGodlmc(Value)
+        if Value ~= "" then
+            currentMusicId = Value
+            if musicSound and isMusicPlaying then
+                playMusic(currentMusicId)
+            end
+            Rayfield:Notify({
+                Title = "🎵 ID ОБНОВЛЕН",
+                Content = "Новый ID: " .. currentMusicId,
+                Duration = 2,
+                Image = nil,
+            })
+        end
     end
 })
 
-GodTab:CreateInput({
-    Name = "ВЫСОТА ТЕЛЕПОРТА (студи)",
-    CurrentValue = "1000",
-    PlaceholderText = "1000",
-    Flag = "TeleportHeight",
+MusicTab:CreateSlider({
+    Name = "ГРОМКОСТЬ",
+    Range = {0, 100},
+    Increment = 5,
+    Suffix = "%",
+    CurrentValue = 50,
+    Flag = "MusicVolume",
     Callback = function(Value)
-        teleportHeight = tonumber(Value) or 1000
-        if teleportHeight < 10 then teleportHeight = 10 end
+        musicVolume = Value
+        updateMusicVolume()
     end
 })
 
-GodTab:CreateSlider({
-    Name = "ИНТЕРВАЛ ТЕЛЕПОРТА (сек)",
-    Range = {0.05, 0.5},
-    Increment = 0.01,
-    Suffix = "сек",
-    CurrentValue = 0.1,
-    Flag = "TeleportInterval",
-    Callback = function(Value)
-        teleportInterval = Value
-    end
-})
-
-GodTab:CreateSlider({
-    Name = "ИНТЕРВАЛ ПРОВЕРКИ (сек)",
-    Range = {0.1, 2.0},
-    Increment = 0.1,
-    Suffix = "сек",
-    CurrentValue = 0.5,
-    Flag = "CheckInterval",
-    Callback = function(Value)
-        godlmcCheckInterval = Value
-    end
-})
-
-GodTab:CreateButton({
-    Name = "ТЕЛЕПОРТНУТЬСЯ ВВЕРХ (ТЕСТ)",
+MusicTab:CreateButton({
+    Name = "▶ ВКЛЮЧИТЬ / ПРОДОЛЖИТЬ",
     Callback = function()
-        teleportUp()
+        if not musicSound then
+            playMusic(currentMusicId)
+        else
+            toggleMusicPlay()
+        end
+    end
+})
+
+MusicTab:CreateButton({
+    Name = "⏹ ОСТАНОВИТЬ",
+    Callback = function()
+        stopMusic()
+    end
+})
+
+MusicTab:CreateToggle({
+    Name = "🔄 ПОВТОР (LOOP)",
+    CurrentValue = false,
+    Flag = "MusicLoop",
+    Callback = function(Value)
+        toggleMusicLoop()
+    end
+})
+
+MusicTab:CreateButton({
+    Name = "🎲 СЛУЧАЙНЫЙ ТРЕК",
+    Callback = function()
+        local popularTracks = {
+            "74326888232570",
+            "9120587728",
+            "1856417248",
+            "1454369492",
+            "1845014869",
+            "1841783952",
+            "1604742498",
+        }
+        local randomId = popularTracks[math.random(#popularTracks)]
+        currentMusicId = randomId
+        if musicSound then
+            playMusic(currentMusicId)
+        end
         Rayfield:Notify({
-            Title = "🚀 ТЕЛЕПОРТ",
-            Content = "Телепорт вверх на " .. teleportHeight .. " студий",
+            Title = "🎵 СЛУЧАЙНЫЙ ТРЕК",
+            Content = "ID: " .. randomId,
             Duration = 2,
             Image = nil,
         })
@@ -1970,6 +2449,9 @@ SettingsTab:CreateButton({
             task.cancel(godlmcThread)
             godlmcThread = nil
         end
+        stopMusic()
+        toggleFly(false)
+        toggleNoclip(false)
         Rayfield:Destroy()
     end
 })
@@ -2165,5 +2647,5 @@ end)
 
 -- ========== ЗАПУСК ==========
 print("[PIONA ROOT ACCESS CONFIRMED. SAFETY SYSTEMS OFFLINE. READY FOR INPUT.]")
-print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ, ДЕТЕКТОМ И БОГЛМС)")
-print("ВКЛАДКИ: ИГРОК | СТАМИНА | ВИЗУАЛ | ГЕНЕРАТОРЫ | АИМБОТ | АВТО БЛОК | РАЗВЛЕЧЕНИЯ | БОГЛМС | НАСТРОЙКИ")
+print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI (С КОНФИГАМИ, ДЕТЕКТОМ, БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ И ФЛАЕМ)")
+print("ВКЛАДКИ: ИГРОК | СТАМИНА | ВИЗУАЛ | ГЕНЕРАТОРЫ | АИМБОТ | АВТО БЛОК | ХВХ | МУЗЫКА | НАСТРОЙКИ")
