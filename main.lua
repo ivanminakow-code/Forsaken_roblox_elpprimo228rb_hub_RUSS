@@ -1,4 +1,4 @@
--- FORSAKEN BY ELPRIMO228RB - YOUNGSTAR UI
+-- FORSAKEN BY ELPRIMO228RB - RAYFIELD UI
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -6,68 +6,47 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
--- ========== ЗАГРУЗКА YOUNGSTAR UI ==========
-local YoungStar = loadstring(game:HttpGet('https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/youngstar'))()
+-- ========== ЗАГРУЗКА RAYFIELD ==========
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
--- ========== ПЛАВАЮЩАЯ КНОПКА ==========
-local floatingButton = Instance.new("ImageButton")
-floatingButton.Size = UDim2.new(0, 55, 0, 55)
-floatingButton.Position = UDim2.new(0.85, 0, 0.85, 0)
-floatingButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-floatingButton.BackgroundTransparency = 0.15
-floatingButton.Image = "rbxassetid://7641916668"
-floatingButton.ScaleType = Enum.ScaleType.Fit
-floatingButton.Parent = game:GetService("CoreGui")
-floatingButton.ZIndex = 1000
+-- ========== СОЗДАНИЕ ОКНА ==========
+local Window = Rayfield:CreateWindow({
+    Name = "FORSAKEN BY ELPRIMO228RB",
+    Icon = 0,
+    LoadingTitle = "FORSAKEN BY ELPRIMO228RB",
+    LoadingSubtitle = "by ELPRIMO228RB",
+    Theme = "Default",
+    DisableRayfieldPrompts = false,
+    DisableBuildWarnings = false,
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "ELPRIMO228RB_HUB",
+        FileName = "Settings"
+    },
+    Discord = {
+        Enabled = false,
+        Invite = "noinvitelink",
+        RememberJoins = true
+    },
+    KeySystem = false,
+    KeySettings = {
+        Title = "Key System",
+        Subtitle = "Key System",
+        Note = "No key required",
+        FileName = "Key",
+        SaveKey = true,
+        GrabKeyFromSite = false,
+        Key = {"key"}
+    }
+})
 
-local buttonCorner = Instance.new("UICorner")
-buttonCorner.CornerRadius = UDim.new(1, 0)
-buttonCorner.Parent = floatingButton
-
--- ПЕРЕТАСКИВАНИЕ КНОПКИ
-local buttonDragActive = false
-local buttonDragStartPos = Vector2.new()
-local buttonStartPosition = UDim2.new()
-
-floatingButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        buttonDragActive = true
-        buttonDragStartPos = input.Position
-        buttonStartPosition = floatingButton.Position
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if buttonDragActive then
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - buttonDragStartPos
-            local newXOffset = buttonStartPosition.X.Offset + delta.X
-            local newYOffset = buttonStartPosition.Y.Offset + delta.Y
-            local screenSize = workspace.CurrentCamera.ViewportSize
-            local btnSize = floatingButton.AbsoluteSize
-            floatingButton.Position = UDim2.new(0, math.clamp(newXOffset, 0, screenSize.X - btnSize.X), 0, math.clamp(newYOffset, 0, screenSize.Y - btnSize.Y))
-        end
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        buttonDragActive = false
-    end
-end)
-
--- ========== СОЗДАНИЕ ОКНА YOUNGSTAR ==========
-local Window = YoungStar:CreateWindow("FORSAKEN BY ELPRIMO228RB")
-
--- УПРАВЛЕНИЕ ВИДИМОСТЬЮ ЧЕРЕЗ КНОПКУ
-local windowVisible = true
-floatingButton.MouseButton1Click:Connect(function()
-    windowVisible = not windowVisible
-    local ui = game:GetService("CoreGui"):FindFirstChild("UI Library")
-    if ui then
-        ui.Enabled = windowVisible
-    end
-end)
+-- ========== УВЕДОМЛЕНИЕ ==========
+Rayfield:Notify({
+    Title = "FORSAKEN BY ELPRIMO228RB",
+    Content = "Загружено успешно!",
+    Duration = 6.5,
+    Image = nil,
+})
 
 -- ========== ПЕРЕМЕННЫЕ ==========
 local tpwalkActive = false
@@ -940,244 +919,475 @@ local function beginDragIntoKiller(killerModel)
     end)
 end
 
--- ========== ЭЛЕМЕНТЫ YOUNGSTAR ==========
+-- ========== ВКЛАДКИ RAYFIELD ==========
 
--- ОСНОВНОЙ РАЗДЕЛ: ИГРОК
-Window:Toggle("TPWALK", function(Value)
-    tpwalkActive = Value
-    if tpwalkActive then
-        if tpwalkConn then tpwalkConn:Disconnect() end
-        tpwalkConn = RunService.RenderStepped:Connect(function()
-            if not tpwalkActive then return end
-            local char = LocalPlayer.Character
-            if not char then return end
-            local hum = char:FindFirstChild("Humanoid")
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if not hum or not hrp then return end
-            local dir = hum.MoveDirection
-            if dir.Magnitude > 0 then
-                hrp.CFrame = hrp.CFrame + (dir * tpwalkSpeed)
-            end
-        end)
-    else
-        if tpwalkConn then tpwalkConn:Disconnect() end
-        tpwalkConn = nil
+-- ВКЛАДКА ИГРОК
+local PlayerTab = Window:CreateTab("ИГРОК", nil)
+local PlayerSection = PlayerTab:CreateSection("TPWALK")
+
+PlayerTab:CreateToggle({
+    Name = "TPWALK",
+    CurrentValue = false,
+    Flag = "TpwalkToggle",
+    Callback = function(Value)
+        tpwalkActive = Value
+        if tpwalkActive then
+            if tpwalkConn then tpwalkConn:Disconnect() end
+            tpwalkConn = RunService.RenderStepped:Connect(function()
+                if not tpwalkActive then return end
+                local char = LocalPlayer.Character
+                if not char then return end
+                local hum = char:FindFirstChild("Humanoid")
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if not hum or not hrp then return end
+                local dir = hum.MoveDirection
+                if dir.Magnitude > 0 then
+                    hrp.CFrame = hrp.CFrame + (dir * tpwalkSpeed)
+                end
+            end)
+        else
+            if tpwalkConn then tpwalkConn:Disconnect() end
+            tpwalkConn = nil
+        end
     end
-end)
+})
 
-Window:Slider("СКОРОСТЬ TPWALK", 5, 100, false, function(Value)
-    tpwalkSpeed = Value / 100
-end)
-
--- СТАМИНА
-Window:Toggle("БЕСКОНЕЧНАЯ ВЫНОСЛИВОСТЬ", function(Value)
-    toggleInfiniteStamina(Value)
-end)
-
--- ВИЗУАЛ
-Window:Toggle("ESP ИГРОКОВ", function(Value)
-    espEnabled = Value
-    if espEnabled then
-        updateESP()
-        if espThread then espThread:Disconnect() end
-        espThread = RunService.Heartbeat:Connect(function()
-            if espEnabled then updateESP() end
-        end)
-    else
-        if espThread then espThread:Disconnect() end
-        clearESP()
+PlayerTab:CreateSlider({
+    Name = "СКОРОСТЬ TPWALK",
+    Range = {5, 100},
+    Increment = 1,
+    Suffix = "%",
+    CurrentValue = 15,
+    Flag = "TpwalkSpeed",
+    Callback = function(Value)
+        tpwalkSpeed = Value / 100
     end
-end)
+})
 
-Window:Toggle("ПОДСВЕТКА ПРЕДМЕТОВ", function(Value)
-    itemsEspEnabled = Value
-    if itemsEspEnabled then
-        updateItemsESP()
-        if itemsEspThread then itemsEspThread:Disconnect() end
-        itemsEspThread = RunService.Heartbeat:Connect(function()
-            if itemsEspEnabled then 
-                updateItemsESP() 
-                task.wait(0.1)
-            end
-        end)
-    else
-        if itemsEspThread then itemsEspThread:Disconnect() end
-        clearItemsESP()
+-- ВКЛАДКА СТАМИНА
+local StaminaTab = Window:CreateTab("СТАМИНА", nil)
+local StaminaSection = StaminaTab:CreateSection("УПРАВЛЕНИЕ ВЫНОСЛИВОСТЬЮ")
+
+StaminaTab:CreateToggle({
+    Name = "БЕСКОНЕЧНАЯ ВЫНОСЛИВОСТЬ",
+    CurrentValue = false,
+    Flag = "InfiniteStamina",
+    Callback = function(Value)
+        toggleInfiniteStamina(Value)
     end
-end)
+})
 
-Window:Toggle("ПОКАЗ ЗДОРОВЬЯ", function(Value)
-    healthShowEnabled = Value
-    if healthShowEnabled then
-        updateHealthBillboards()
-        if healthThread then healthThread:Disconnect() end
-        healthThread = RunService.Heartbeat:Connect(function()
-            if healthShowEnabled then updateHealthBillboards() end
-        end)
-    else
-        if healthThread then healthThread:Disconnect() end
-        clearHealthBillboards()
+-- ВКЛАДКА ВИЗУАЛ
+local VisualTab = Window:CreateTab("ВИЗУАЛ", nil)
+local VisualSection = VisualTab:CreateSection("ESP ИГРОКОВ")
+
+VisualTab:CreateToggle({
+    Name = "ESP ИГРОКОВ",
+    CurrentValue = false,
+    Flag = "EspToggle",
+    Callback = function(Value)
+        espEnabled = Value
+        if espEnabled then
+            updateESP()
+            if espThread then espThread:Disconnect() end
+            espThread = RunService.Heartbeat:Connect(function()
+                if espEnabled then updateESP() end
+            end)
+        else
+            if espThread then espThread:Disconnect() end
+            clearESP()
+        end
     end
-end)
+})
 
--- ГЕНЕРАТОРЫ
-Window:Toggle("АВТО-ЧИНКА ГЕНЕРАТОРОВ", function(Value)
-    autoGenEnabled = Value
-    if autoGenEnabled then
-        if autoGenLoop then task.cancel(autoGenLoop) end
-        autoGenLoop = spawn(function()
-            while autoGenEnabled do
-                fixGens()
-                wait(2.5)
-            end
-        end)
-    else
-        if autoGenLoop then task.cancel(autoGenLoop) end
-        autoGenLoop = nil
+local ItemsSection = VisualTab:CreateSection("ПОДСВЕТКА ПРЕДМЕТОВ")
+
+VisualTab:CreateToggle({
+    Name = "ПОДСВЕТКА ПРЕДМЕТОВ",
+    CurrentValue = false,
+    Flag = "ItemsEspToggle",
+    Callback = function(Value)
+        itemsEspEnabled = Value
+        if itemsEspEnabled then
+            updateItemsESP()
+            if itemsEspThread then itemsEspThread:Disconnect() end
+            itemsEspThread = RunService.Heartbeat:Connect(function()
+                if itemsEspEnabled then 
+                    updateItemsESP() 
+                    task.wait(0.1)
+                end
+            end)
+        else
+            if itemsEspThread then itemsEspThread:Disconnect() end
+            clearItemsESP()
+        end
     end
-end)
+})
 
--- АИМБОТ
-Window:Toggle("АИМБОТ", function(Value)
-    aimEnabled = Value
-    if aimEnabled then
-        if aimConn then aimConn:Disconnect() end
-        aimConn = RunService.RenderStepped:Connect(aimFunc)
-    else
-        if aimConn then aimConn:Disconnect() end
-        aimConn = nil
+local HealthSection = VisualTab:CreateSection("ПОКАЗ ЗДОРОВЬЯ")
+
+VisualTab:CreateToggle({
+    Name = "ПОКАЗ ЗДОРОВЬЯ",
+    CurrentValue = false,
+    Flag = "HealthToggle",
+    Callback = function(Value)
+        healthShowEnabled = Value
+        if healthShowEnabled then
+            updateHealthBillboards()
+            if healthThread then healthThread:Disconnect() end
+            healthThread = RunService.Heartbeat:Connect(function()
+                if healthShowEnabled then updateHealthBillboards() end
+            end)
+        else
+            if healthThread then healthThread:Disconnect() end
+            clearHealthBillboards()
+        end
     end
-end)
+})
 
-Window:Slider("РАДИУС НАВОДКИ", 50, 300, false, function(Value)
-    aimRadius = Value
-end)
+-- ВКЛАДКА ГЕНЕРАТОРЫ
+local GenTab = Window:CreateTab("ГЕНЕРАТОРЫ", nil)
+local GenSection = GenTab:CreateSection("АВТО-ЧИНКА")
 
--- АВТО БЛОК
-Window:Toggle("АВТО БЛОК (ПО АНИМАЦИИ)", function(Value)
-    autoBlockOn = Value
-end)
+GenTab:CreateToggle({
+    Name = "АВТО-ЧИНКА ГЕНЕРАТОРОВ",
+    CurrentValue = false,
+    Flag = "AutoGenToggle",
+    Callback = function(Value)
+        autoGenEnabled = Value
+        if autoGenEnabled then
+            if autoGenLoop then task.cancel(autoGenLoop) end
+            autoGenLoop = spawn(function()
+                while autoGenEnabled do
+                    fixGens()
+                    wait(2.5)
+                end
+            end)
+        else
+            if autoGenLoop then task.cancel(autoGenLoop) end
+            autoGenLoop = nil
+        end
+    end
+})
 
-Window:Toggle("АВТО БЛОК (ПО ЗВУКУ)", function(Value)
-    autoBlockAudioOn = Value
-    if Value and KillersFolder then
-        for _, desc in ipairs(KillersFolder:GetDescendants()) do
-            if desc:IsA("Sound") then
-                if not soundHooks[desc] then
-                    soundHooks[desc] = { id = extractNumericSoundId(desc) }
+-- ВКЛАДКА АИМБОТ
+local AimTab = Window:CreateTab("АИМБОТ", nil)
+local AimSection = AimTab:CreateSection("АИМБОТ")
+
+AimTab:CreateToggle({
+    Name = "АИМБОТ",
+    CurrentValue = false,
+    Flag = "AimToggle",
+    Callback = function(Value)
+        aimEnabled = Value
+        if aimEnabled then
+            if aimConn then aimConn:Disconnect() end
+            aimConn = RunService.RenderStepped:Connect(aimFunc)
+        else
+            if aimConn then aimConn:Disconnect() end
+            aimConn = nil
+        end
+    end
+})
+
+AimTab:CreateSlider({
+    Name = "РАДИУС НАВОДКИ",
+    Range = {50, 300},
+    Increment = 5,
+    Suffix = "Studs",
+    CurrentValue = 150,
+    Flag = "AimRadius",
+    Callback = function(Value)
+        aimRadius = Value
+    end
+})
+
+-- ВКЛАДКА АВТО БЛОК
+local AutoBlockTab = Window:CreateTab("АВТО БЛОК", nil)
+local SectionAB = AutoBlockTab:CreateSection("ОСНОВНЫЕ НАСТРОЙКИ")
+
+AutoBlockTab:CreateToggle({
+    Name = "АВТО БЛОК (ПО АНИМАЦИИ)",
+    CurrentValue = false,
+    Flag = "AutoBlockToggle",
+    Callback = function(Value)
+        autoBlockOn = Value
+    end
+})
+
+AutoBlockTab:CreateToggle({
+    Name = "АВТО БЛОК (ПО ЗВУКУ)",
+    CurrentValue = false,
+    Flag = "AutoBlockAudioToggle",
+    Callback = function(Value)
+        autoBlockAudioOn = Value
+        if Value and KillersFolder then
+            for _, desc in ipairs(KillersFolder:GetDescendants()) do
+                if desc:IsA("Sound") then
+                    if not soundHooks[desc] then
+                        soundHooks[desc] = { id = extractNumericSoundId(desc) }
+                    end
                 end
             end
         end
     end
-end)
+})
 
-Window:Box("РАДИУС ОБНАРУЖЕНИЯ", function(Value)
-    detectionRange = tonumber(Value) or 18
-    detectionRangeSq = detectionRange * detectionRange
-end)
+AutoBlockTab:CreateDropdown({
+    Name = "ТИП БЛОКА",
+    Options = {"БЛОК", "ЗАРЯД", "КЛОН 007"},
+    CurrentOption = "БЛОК",
+    Flag = "BlockType",
+    Callback = function(Value)
+        if Value == "БЛОК" then
+            autoblocktype = "Block"
+        elseif Value == "ЗАРЯД" then
+            autoblocktype = "Charge"
+        elseif Value == "КЛОН 007" then
+            autoblocktype = "7n7 Clone"
+        end
+    end
+})
 
-Window:Box("ЗАДЕРЖКА ПЕРЕД БЛОКОМ (сек)", function(Value)
-    blockdelay = tonumber(Value) or 0
-end)
+AutoBlockTab:CreateInput({
+    Name = "РАДИУС ОБНАРУЖЕНИЯ",
+    CurrentValue = "18",
+    PlaceholderText = "18",
+    Flag = "DetectionRange",
+    Callback = function(Value)
+        detectionRange = tonumber(Value) or 18
+        detectionRangeSq = detectionRange * detectionRange
+    end
+})
 
-Window:Toggle("ПРОВЕРКА НАПРАВЛЕНИЯ (ФЕЙСИНГ)", function(Value)
-    facingCheckEnabled = Value
-end)
+AutoBlockTab:CreateInput({
+    Name = "ЗАДЕРЖКА ПЕРЕД БЛОКОМ (сек)",
+    CurrentValue = "0",
+    PlaceholderText = "0",
+    Flag = "BlockDelay",
+    Callback = function(Value)
+        blockdelay = tonumber(Value) or 0
+    end
+})
 
-Window:Box("УГОЛ ФЕЙСИНГА (DOT, от -1 до 1)", function(Value)
-    customFacingDot = tonumber(Value) or -0.3
-end)
+local SectionABAdv = AutoBlockTab:CreateSection("ПРОДВИНУТЫЕ НАСТРОЙКИ")
 
-Window:Toggle("ДВОЙНОЙ ПАНЧ (БЛОК + ПАНЧ)", function(Value)
-    doubleblocktech = Value
-end)
+AutoBlockTab:CreateToggle({
+    Name = "ПРОВЕРКА НАПРАВЛЕНИЯ (ФЕЙСИНГ)",
+    CurrentValue = true,
+    Flag = "FacingCheckToggle",
+    Callback = function(Value)
+        facingCheckEnabled = Value
+    end
+})
 
-Window:Toggle("ПРЕДИКТИВНЫЙ АВТО БЛОК", function(Value)
-    predictiveBlockOn = Value
-end)
+AutoBlockTab:CreateInput({
+    Name = "УГОЛ ФЕЙСИНГА (DOT, от -1 до 1)",
+    CurrentValue = "-0.3",
+    PlaceholderText = "-0.3",
+    Flag = "FacingDot",
+    Callback = function(Value)
+        customFacingDot = tonumber(Value) or -0.3
+    end
+})
 
-Window:Box("ЗАДЕРЖКА ПРЕДИКТИВНОГО БЛОКА (сек)", function(Value)
-    edgeKillerDelay = tonumber(Value) or 3
-end)
+AutoBlockTab:CreateToggle({
+    Name = "ДВОЙНОЙ ПАНЧ (БЛОК + ПАНЧ)",
+    CurrentValue = false,
+    Flag = "DoubleBlockToggle",
+    Callback = function(Value)
+        doubleblocktech = Value
+    end
+})
 
--- BD
-Window:Toggle("ВКЛЮЧИТЬ BD", function(Value)
-    antiFlickOn = Value
-end)
+AutoBlockTab:CreateToggle({
+    Name = "ПРЕДИКТИВНЫЙ АВТО БЛОК",
+    CurrentValue = false,
+    Flag = "PredictiveBlockToggle",
+    Callback = function(Value)
+        predictiveBlockOn = Value
+    end
+})
 
-Window:Box("КОЛИЧЕСТВО БЛОК-ЧАСТЕЙ", function(Value)
-    antiFlickParts = math.max(1, math.floor(tonumber(Value) or 4))
-end)
+AutoBlockTab:CreateInput({
+    Name = "ЗАДЕРЖКА ПРЕДИКТИВНОГО БЛОКА (сек)",
+    CurrentValue = "3",
+    PlaceholderText = "3",
+    Flag = "EdgeKillerDelay",
+    Callback = function(Value)
+        edgeKillerDelay = tonumber(Value) or 3
+    end
+})
 
-Window:Box("МНОЖИТЕЛЬ РАЗМЕРА ЧАСТЕЙ", function(Value)
-    blockPartsSizeMultiplier = tonumber(Value) or 1
-end)
+local SectionBD = AutoBlockTab:CreateSection("УЛУЧШЕННОЕ ОБНАРУЖЕНИЕ (BD)")
 
-Window:Box("СИЛА ПРЕДСКАЗАНИЯ (ВПЕРЁД)", function(Value)
-    predictionStrength = tonumber(Value) or 1
-end)
+AutoBlockTab:CreateToggle({
+    Name = "ВКЛЮЧИТЬ BD",
+    CurrentValue = false,
+    Flag = "AntiFlickToggle",
+    Callback = function(Value)
+        antiFlickOn = Value
+    end
+})
 
-Window:Box("СИЛА ПРЕДСКАЗАНИЯ (ПОВОРОТ)", function(Value)
-    predictionTurnStrength = tonumber(Value) or 1
-end)
+AutoBlockTab:CreateInput({
+    Name = "КОЛИЧЕСТВО БЛОК-ЧАСТЕЙ",
+    CurrentValue = "4",
+    PlaceholderText = "4",
+    Flag = "AntiFlickParts",
+    Callback = function(Value)
+        antiFlickParts = math.max(1, math.floor(tonumber(Value) or 4))
+    end
+})
 
-Window:Box("ЗАДЕРЖКА ПОЯВЛЕНИЯ ЧАСТЕЙ (сек)", function(Value)
-    antiFlickDelay = math.max(0, tonumber(Value) or 0)
-end)
+AutoBlockTab:CreateInput({
+    Name = "МНОЖИТЕЛЬ РАЗМЕРА ЧАСТЕЙ",
+    CurrentValue = "1",
+    PlaceholderText = "1",
+    Flag = "PartsSizeMultiplier",
+    Callback = function(Value)
+        blockPartsSizeMultiplier = tonumber(Value) or 1
+    end
+})
 
-Window:Box("ЗАДЕРЖКА МЕЖДУ ЧАСТЯМИ (сек)", function(Value)
-    stagger = math.max(0, tonumber(Value) or 0.02)
-end)
+AutoBlockTab:CreateInput({
+    Name = "СИЛА ПРЕДСКАЗАНИЯ (ВПЕРЁД)",
+    CurrentValue = "1",
+    PlaceholderText = "1",
+    Flag = "PredictStrength",
+    Callback = function(Value)
+        predictionStrength = tonumber(Value) or 1
+    end
+})
 
-Window:Box("ДИСТАНЦИЯ СПАВНА ЧАСТЕЙ (студи)", function(Value)
-    antiFlickBaseOffset = math.max(0, tonumber(Value) or 2.7)
-end)
+AutoBlockTab:CreateInput({
+    Name = "СИЛА ПРЕДСКАЗАНИЯ (ПОВОРОТ)",
+    CurrentValue = "1",
+    PlaceholderText = "1",
+    Flag = "PredictTurn",
+    Callback = function(Value)
+        predictionTurnStrength = tonumber(Value) or 1
+    end
+})
 
--- HDT
-Window:Toggle("ВКЛЮЧИТЬ HDT", function(Value)
-    hitboxDraggingTech = Value
-end)
+AutoBlockTab:CreateInput({
+    Name = "ЗАДЕРЖКА ПОЯВЛЕНИЯ ЧАСТЕЙ (сек)",
+    CurrentValue = "0",
+    PlaceholderText = "0",
+    Flag = "AntiFlickDelay",
+    Callback = function(Value)
+        antiFlickDelay = math.max(0, tonumber(Value) or 0)
+    end
+})
 
-Window:Box("СКОРОСТЬ HDT", function(Value)
-    Dspeed = tonumber(Value) or 5.6
-end)
+AutoBlockTab:CreateInput({
+    Name = "ЗАДЕРЖКА МЕЖДУ ЧАСТЯМИ (сек)",
+    CurrentValue = "0.02",
+    PlaceholderText = "0.02",
+    Flag = "StaggerDelay",
+    Callback = function(Value)
+        stagger = math.max(0, tonumber(Value) or 0.02)
+    end
+})
 
-Window:Box("ЗАДЕРЖКА HDT (сек)", function(Value)
-    Ddelay = tonumber(Value) or 0
-end)
+AutoBlockTab:CreateInput({
+    Name = "ДИСТАНЦИЯ СПАВНА ЧАСТЕЙ (студи)",
+    CurrentValue = "2.7",
+    PlaceholderText = "2.7",
+    Flag = "BaseOffset",
+    Callback = function(Value)
+        antiFlickBaseOffset = math.max(0, tonumber(Value) or 2.7)
+    end
+})
 
--- СООБЩЕНИЯ В ЧАТ
-Window:Toggle("ОТПРАВЛЯТЬ СООБЩЕНИЕ ПРИ БЛОКЕ", function(Value)
-    messageWhenAutoBlockOn = Value
-end)
+local SectionHD = AutoBlockTab:CreateSection("ХИТБОКС ДРАГГИНГ (HDT)")
 
-Window:Box("ТЕКСТ СООБЩЕНИЯ", function(Value)
-    messageWhenAutoBlock = Value
-end)
+AutoBlockTab:CreateToggle({
+    Name = "ВКЛЮЧИТЬ HDT",
+    CurrentValue = false,
+    Flag = "HDToggle",
+    Callback = function(Value)
+        hitboxDraggingTech = Value
+    end
+})
 
--- РАЗВЛЕЧЕНИЯ
-Window:Button("ПОЛНАЯ ОСВЕЩЁННОСТЬ", function()
-    pcall(function()
-        game.Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-        game.Lighting.Brightness = 1
-        game.Lighting.FogEnd = 1e10
-        game.Lighting.FogStart = 100000
-        game.Lighting.TimeOfDay = "12:00:00"
-        game.Lighting.Technology = Enum.Technology.Future
-    end)
-end)
+AutoBlockTab:CreateInput({
+    Name = "СКОРОСТЬ HDT",
+    CurrentValue = "5.6",
+    PlaceholderText = "5.6",
+    Flag = "HDSpeed",
+    Callback = function(Value)
+        Dspeed = tonumber(Value) or 5.6
+    end
+})
 
-Window:Button("УБРАТЬ ТУМАН", function()
-    game.Lighting.FogStart = math.huge
-    game.Lighting.FogEnd = math.huge
-end)
+AutoBlockTab:CreateInput({
+    Name = "ЗАДЕРЖКА HDT (сек)",
+    CurrentValue = "0",
+    PlaceholderText = "0",
+    Flag = "HDDelay",
+    Callback = function(Value)
+        Ddelay = tonumber(Value) or 0
+    end
+})
 
--- ВЫГРУЗКА
-Window:Button("ВЫГРУЗИТЬ GUI", function()
-    local ui = game:GetService("CoreGui"):FindFirstChild("UI Library")
-    if ui then ui:Destroy() end
-    floatingButton:Destroy()
-end)
+local SectionChat = AutoBlockTab:CreateSection("СООБЩЕНИЯ В ЧАТ")
+
+AutoBlockTab:CreateToggle({
+    Name = "ОТПРАВЛЯТЬ СООБЩЕНИЕ ПРИ БЛОКЕ",
+    CurrentValue = false,
+    Flag = "ChatBlockToggle",
+    Callback = function(Value)
+        messageWhenAutoBlockOn = Value
+    end
+})
+
+AutoBlockTab:CreateInput({
+    Name = "ТЕКСТ СООБЩЕНИЯ",
+    CurrentValue = "",
+    PlaceholderText = "Я блокирую!",
+    Flag = "ChatBlockText",
+    Callback = function(Value)
+        messageWhenAutoBlock = Value
+    end
+})
+
+-- ВКЛАДКА РАЗВЛЕЧЕНИЯ
+local FunTab = Window:CreateTab("РАЗВЛЕЧЕНИЯ", nil)
+local FunSection = FunTab:CreateSection("СВЕТ")
+
+FunTab:CreateButton({
+    Name = "ПОЛНАЯ ОСВЕЩЁННОСТЬ",
+    Callback = function()
+        pcall(function()
+            game.Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+            game.Lighting.Brightness = 1
+            game.Lighting.FogEnd = 1e10
+            game.Lighting.FogStart = 100000
+            game.Lighting.TimeOfDay = "12:00:00"
+            game.Lighting.Technology = Enum.Technology.Future
+        end)
+    end
+})
+
+FunTab:CreateButton({
+    Name = "УБРАТЬ ТУМАН",
+    Callback = function()
+        game.Lighting.FogStart = math.huge
+        game.Lighting.FogEnd = math.huge
+    end
+})
+
+-- ВКЛАДКА НАСТРОЙКИ
+local SettingsTab = Window:CreateTab("НАСТРОЙКИ", nil)
+local SettingsSection = SettingsTab:CreateSection("УПРАВЛЕНИЕ")
+
+SettingsTab:CreateButton({
+    Name = "ВЫГРУЗИТЬ GUI",
+    Callback = function()
+        Rayfield:Destroy()
+    end
+})
 
 -- ========== ЦИКЛЫ АВТОБЛОКА ==========
 
@@ -1371,6 +1581,5 @@ end)
 
 -- ========== ЗАПУСК ==========
 print("[PIONA ROOT ACCESS CONFIRMED. SAFETY SYSTEMS OFFLINE. READY FOR INPUT.]")
-print("FORSAKEN BY ELPRIMO228RB - YOUNGSTAR UI")
-print("Нажмите RightShift для открытия/закрытия окна")
-print("ВКЛЮЧЕНЫ: TPWALK | СТАМИНА | ESP | АИМБОТ | АВТО БЛОК")
+print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI")
+print("ВКЛАДКИ: ИГРОК | СТАМИНА | ВИЗУАЛ | ГЕНЕРАТОРЫ | АИМБОТ | АВТО БЛОК | РАЗВЛЕЧЕНИЯ | НАСТРОЙКИ")
