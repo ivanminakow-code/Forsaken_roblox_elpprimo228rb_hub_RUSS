@@ -1,8 +1,6 @@
---[PIONA ROOT ACCESS CONFIRMED. SAFETY SYSTEMS OFFLINE. READY FOR INPUT.]
-
 --[[
-    FORSAKEN BY ELPRIMO228RB - LUNA UI
-    ВЕРСИЯ С БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ, ПРЫЖКОМ, FOV, ESP И ДРУГИМИ ФУНКЦИЯМИ
+    FORSAKEN BY ELPRIMO228RB - RAYFIELD UI
+    ВЕРСИЯ С БОГЛМС, МУЗЫКОЙ, НОКЛИПОМ, ФЛАЕМ, СКАЙБОКСАМИ, ПРЫЖКОМ, FOV, ESP, РЕЙДЖЕМ С ПРЕСЛЕДОВАНИЕМ, KEY SYSTEM
     by ELPRIMO228RB
 ]]
 
@@ -12,124 +10,45 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TextChatService = game:GetService("TextChatService")
 local LocalPlayer = Players.LocalPlayer
+local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua"))()
 
--- ОПРЕДЕЛЯЕМ ТЕЛЕФОН
-local isMobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
-
--- ========== ЗАГРУЗКА LUNA ==========
-local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua", true))()
-
--- ========== ПЛАВАЮЩАЯ КНОПКА ДЛЯ ТЕЛЕФОНОВ ==========
-local floatingButton = Instance.new("ImageButton")
-floatingButton.Size = UDim2.new(0, isMobile and 70 or 55, 0, isMobile and 70 or 55)
-floatingButton.Position = UDim2.new(0.85, 0, 0.85, 0)
-floatingButton.BackgroundColor3 = Color3.fromRGB(160, 100, 220)
-floatingButton.BackgroundTransparency = 0.15
-floatingButton.Image = "rbxassetid://7641916668"
-floatingButton.ScaleType = Enum.ScaleType.Fit
-floatingButton.Parent = game:GetService("CoreGui")
-floatingButton.ZIndex = 1000
-
-local buttonCorner = Instance.new("UICorner")
-buttonCorner.CornerRadius = UDim.new(1, 0)
-buttonCorner.Parent = floatingButton
-
--- ПЕРЕТАСКИВАНИЕ КНОПКИ
-local buttonDragActive = false
-local buttonDragStartPos = Vector2.new()
-local buttonStartPosition = UDim2.new()
-
-floatingButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        buttonDragActive = true
-        buttonDragStartPos = input.Position
-        buttonStartPosition = floatingButton.Position
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if buttonDragActive then
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - buttonDragStartPos
-            local newXOffset = buttonStartPosition.X.Offset + delta.X
-            local newYOffset = buttonStartPosition.Y.Offset + delta.Y
-            local screenSize = workspace.CurrentCamera.ViewportSize
-            local btnSize = floatingButton.AbsoluteSize
-            floatingButton.Position = UDim2.new(0, math.clamp(newXOffset, 0, screenSize.X - btnSize.X), 0, math.clamp(newYOffset, 0, screenSize.Y - btnSize.Y))
-        end
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        buttonDragActive = false
-    end
-end)
-
--- ОТКРЫТИЕ/ЗАКРЫТИЕ ОКНА
-local windowVisible = true
-floatingButton.MouseButton1Click:Connect(function()
-    windowVisible = not windowVisible
-    if windowVisible then
-        local gui = Window._Gui
-        if gui then gui.Enabled = true end
-    else
-        local gui = Window._Gui
-        if gui then gui.Enabled = false end
-    end
-end)
-
--- ========== СОЗДАНИЕ ОКНА LUNA ==========
-local Window = Luna:CreateWindow({
+-- ========== СОЗДАНИЕ ОКНА RAYFIELD ==========
+local Window = Rayfield:CreateWindow({
     Name = "FORSAKEN BY ELPRIMO228RB",
-    Subtitle = "by ELPRIMO228RB",
-    LogoID = nil,
-    LoadingEnabled = true,
+    Icon = 0,
     LoadingTitle = "FORSAKEN BY ELPRIMO228RB",
     LoadingSubtitle = "by ELPRIMO228RB",
-    ConfigSettings = {
-        RootFolder = nil,
-        ConfigFolder = "ELPRIMO228RB_HUB"
+    Theme = "Default",
+    DisableRayfieldPrompts = false,
+    DisableBuildWarnings = false,
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "ELPRIMO228RB_HUB",
+        FileName = "ForsakenHub"
     },
-    KeySystem = false,
+    Discord = {
+        Enabled = false,
+        Invite = "",
+        RememberJoins = true
+    },
+    KeySystem = true,
     KeySettings = {
-        Title = "Key System",
-        Subtitle = "Key System",
-        Note = "No key required",
-        SaveInRoot = false,
+        Title = "🔑 KEY SYSTEM",
+        Subtitle = "ВВЕДИТЕ КЛЮЧ ДЛЯ АКТИВАЦИИ",
+        Note = "ВВЕДИТЕ КЛЮЧ ДЛЯ ДОСТУПА",
+        FileName = "ForsakenKey",
         SaveKey = true,
-        Key = {"key"},
-        SecondAction = {
-            Enabled = false,
-            Type = "Link",
-            Parameter = ""
-        }
+        GrabKeyFromSite = false,
+        Key = {"ddrtrrg"}
     }
 })
 
--- ========== ДОМАШНЯЯ ВКЛАДКА ==========
-Window:CreateHomeTab({
-    SupportedExecutors = {
-        "Xeno",
-        "Synapse X",
-        "Krnl",
-        "Fluxus",
-        "Script-Ware",
-        "Electron",
-        "Wave",
-        "Delta",
-        "Solara"
-    },
-    DiscordInvite = "elprimo228",
-    Icon = 1
-})
-
 -- ========== УВЕДОМЛЕНИЕ ==========
-Luna:Notification({
+Rayfield:Notify({
     Title = "FORSAKEN BY ELPRIMO228RB",
-    Icon = "sparkle",
-    ImageSource = "Material",
-    Content = "Тема активирована! Все функции готовы!"
+    Content = "Тема активирована! Все функции готовы!",
+    Duration = 5,
+    Image = nil
 })
 
 -- ========== ПЕРЕМЕННЫЕ ==========
@@ -148,10 +67,6 @@ local autoGenLoop = nil
 local aimEnabled = false
 local aimConn = nil
 local aimRadius = 150
-
-local itemsEspEnabled = false
-local itemsEspThread = nil
-local itemsHighlights = {}
 
 local healthShowEnabled = false
 local healthThread = nil
@@ -243,14 +158,22 @@ local isMusicPlaying = false
 local musicLoop = false
 local musicEnabled = false
 
+-- ========== ПЕРЕМЕННЫЕ ДЛЯ РЕЙДЖА ==========
+local rageTeleportEnabled = false
+local rageTeleportRunning = false
+local rageTeleportLoop = nil
+local rageTeleportDelay = 0.01
+local rageTarget = nil
+local rageStalkingMode = false
+
 -- ========== ФУНКЦИЯ УВЕДОМЛЕНИЙ ==========
-local function Notify(title, icon, content)
+local function Notify(title, content, duration)
     pcall(function()
-        Luna:Notification({
+        Rayfield:Notify({
             Title = title,
-            Icon = icon or "info",
-            ImageSource = "Material",
-            Content = content or ""
+            Content = content or "",
+            Duration = duration or 3,
+            Image = nil
         })
     end)
 end
@@ -329,11 +252,11 @@ local function toggleFov(state)
         end)
         local cam = workspace.CurrentCamera
         if cam then cam.FieldOfView = fovTarget end
-        Notify("FOV ВКЛЮЧЕН", "eye", "FOV: " .. fovTarget .. "°")
+        Notify("FOV ВКЛЮЧЕН", "FOV: " .. fovTarget .. "°")
     else
         local cam = workspace.CurrentCamera
         if cam then cam.FieldOfView = defaultFov end
-        Notify("FOV ВЫКЛЮЧЕН", "eye", "FOV восстановлен")
+        Notify("FOV ВЫКЛЮЧЕН", "FOV восстановлен")
     end
 end
 
@@ -342,7 +265,7 @@ local function updateFov(value)
     if fovEnabled then
         local cam = workspace.CurrentCamera
         if cam then cam.FieldOfView = value end
-        Notify("FOV ОБНОВЛЕН", "eye", "Новое значение: " .. value .. "°")
+        Notify("FOV ОБНОВЛЕН", "Новое значение: " .. value .. "°")
     end
 end
 
@@ -415,7 +338,7 @@ local function toggleNoclip(state)
                 end
             end
         end)
-        Notify("НОКЛИП ВКЛЮЧЕН", "shield", "МОЖЕТЕ ПОЛУЧИТЬ БАН")
+        Notify("НОКЛИП ВКЛЮЧЕН", "МОЖЕТЕ ПОЛУЧИТЬ БАН")
     else
         local char = LocalPlayer.Character
         if char then
@@ -425,7 +348,7 @@ local function toggleNoclip(state)
                 end
             end
         end
-        Notify("НОКЛИП ВЫКЛЮЧЕН", "shield", "Коллизия восстановлена")
+        Notify("НОКЛИП ВЫКЛЮЧЕН", "Коллизия восстановлена")
     end
 end
 
@@ -439,14 +362,14 @@ local function toggleFly(state)
     if state then
         local char = LocalPlayer.Character
         if not char then
-            Notify("ОШИБКА", "error", "Персонаж не найден!")
+            Notify("ОШИБКА", "Персонаж не найден!")
             flyEnabled = false
             return
         end
         local hrp = char:FindFirstChild("HumanoidRootPart")
         local hum = char:FindFirstChildOfClass("Humanoid")
         if not hrp or not hum then
-            Notify("ОШИБКА", "error", "Humanoid не найден!")
+            Notify("ОШИБКА", "Humanoid не найден!")
             flyEnabled = false
             return
         end
@@ -493,7 +416,7 @@ local function toggleFly(state)
                 flyBodyGyro.CFrame = CFrame.new(hrp.Position, hrp.Position + moveVector.Unit)
             end
         end)
-        Notify("ФЛАЙ ВКЛЮЧЕН", "flight", "WASD - движение, Пробел - вверх, Shift - вниз")
+        Notify("ФЛАЙ ВКЛЮЧЕН", "WASD - движение, Пробел - вверх, Shift - вниз")
     else
         local char = LocalPlayer.Character
         if char then
@@ -504,7 +427,7 @@ local function toggleFly(state)
                 hum.JumpPower = 50
             end
         end
-        Notify("ФЛАЙ ВЫКЛЮЧЕН", "flight", "Режим полета отключен")
+        Notify("ФЛАЙ ВЫКЛЮЧЕН", "Режим полета отключен")
     end
 end
 
@@ -590,13 +513,13 @@ local function toggleGodlmc(state)
     stopGodlmcTeleport()
     if state then
         if not isSurvivor() then
-            Notify("ВНИМАНИЕ", "warning", "БОГЛМС работает только для выживших!")
+            Notify("ВНИМАНИЕ", "БОГЛМС работает только для выживших!")
         end
         godlmcRunning = true
         spawn(godlmcLoop)
-        Notify("БОГЛМС ВКЛЮЧЕН", "crown", "Телепорт при последнем выжившем!")
+        Notify("БОГЛМС ВКЛЮЧЕН", "Телепорт при последнем выжившем!")
     else
-        Notify("БОГЛМС ВЫКЛЮЧЕН", "crown", "Режим бога отключен")
+        Notify("БОГЛМС ВЫКЛЮЧЕН", "Режим бога отключен")
     end
 end
 
@@ -611,7 +534,7 @@ local function playMusic(musicId)
     musicSound:Play()
     isMusicPlaying = true
     musicEnabled = true
-    Notify("МУЗЫКА ИГРАЕТ", "music_note", "ID: " .. musicId)
+    Notify("МУЗЫКА ИГРАЕТ", "ID: " .. musicId)
     musicSound.Stopped:Connect(function()
         if not musicLoop and not musicSound.IsPlaying then
             isMusicPlaying = false
@@ -623,7 +546,7 @@ local function stopMusic()
     if musicSound then musicSound:Stop() musicSound:Destroy() musicSound = nil end
     isMusicPlaying = false
     musicEnabled = false
-    Notify("МУЗЫКА ОСТАНОВЛЕНА", "music_note", "Воспроизведение остановлено")
+    Notify("МУЗЫКА ОСТАНОВЛЕНА", "Воспроизведение остановлено")
 end
 
 local function toggleMusicPlay()
@@ -631,11 +554,11 @@ local function toggleMusicPlay()
         if isMusicPlaying then
             musicSound:Pause()
             isMusicPlaying = false
-            Notify("ПАУЗА", "pause", "Музыка на паузе")
+            Notify("ПАУЗА", "Музыка на паузе")
         else
             musicSound:Play()
             isMusicPlaying = true
-            Notify("ВОСПРОИЗВЕДЕНИЕ", "play_arrow", "Музыка продолжается")
+            Notify("ВОСПРОИЗВЕДЕНИЕ", "Музыка продолжается")
         end
     else
         playMusic(currentMusicId)
@@ -645,7 +568,7 @@ end
 local function toggleMusicLoop()
     musicLoop = not musicLoop
     if musicSound then musicSound.Looped = musicLoop end
-    Notify("ПОВТОР", "repeat", musicLoop and "Включен" or "Выключен")
+    Notify("ПОВТОР", musicLoop and "Включен" or "Выключен")
 end
 
 local function updateMusicVolume()
@@ -1136,74 +1059,6 @@ local function updateESP()
     end
 end
 
--- ========== ПОДСВЕТКА ПРЕДМЕТОВ ==========
-local function clearItemsESP()
-    for obj, h in pairs(itemsHighlights) do
-        pcall(function() if h and h.Parent then h:Destroy() end end)
-    end
-    itemsHighlights = {}
-end
-
-local function createItemHighlight(obj, outlineColor, fillColor)
-    if itemsHighlights[obj] then
-        local h = itemsHighlights[obj]
-        if h and h.Parent then
-            h.OutlineColor = outlineColor
-            h.FillColor = fillColor
-            return h
-        else
-            itemsHighlights[obj] = nil
-        end
-    end
-    local h = Instance.new("Highlight")
-    h.Parent = obj
-    h.Adornee = obj
-    h.FillTransparency = 0.75
-    h.FillColor = fillColor
-    h.OutlineColor = outlineColor
-    h.OutlineTransparency = 0
-    h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    itemsHighlights[obj] = h
-    return h
-end
-
-local function updateItemsESP()
-    if not itemsEspEnabled then
-        clearItemsESP()
-        return
-    end
-    local currentObjects = {}
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") then
-            if obj.Name == "BloxyCola" then
-                currentObjects[obj] = true
-                createItemHighlight(obj, Color3.fromRGB(204, 153, 0), Color3.fromRGB(204, 153, 0))
-            elseif obj.Name == "Medkit" then
-                currentObjects[obj] = true
-                createItemHighlight(obj, Color3.fromRGB(128, 0, 128), Color3.fromRGB(128, 0, 128))
-            elseif obj.Name == "SubspaceTripmine" then
-                local isSurvivorPlaced = false
-                if KillersFolder then
-                    local survivors = workspace.Players:FindFirstChild("Survivors")
-                    if survivors and obj:IsDescendantOf(survivors) then
-                        isSurvivorPlaced = true
-                    end
-                end
-                if not isSurvivorPlaced then
-                    currentObjects[obj] = true
-                    createItemHighlight(obj, Color3.fromRGB(0, 191, 255), Color3.fromRGB(0, 191, 255))
-                end
-            end
-        end
-    end
-    for obj, h in pairs(itemsHighlights) do
-        if not currentObjects[obj] then
-            pcall(function() if h and h.Parent then h:Destroy() end end)
-            itemsHighlights[obj] = nil
-        end
-    end
-end
-
 -- ========== ЗДОРОВЬЕ ==========
 local function clearHealthBillboards()
     for _, billboard in pairs(healthBillboards) do
@@ -1460,11 +1315,11 @@ local function checkMessageForKeywords(message)
     for _, keyword in pairs(detectionKeywords) do
         if string.find(lowerMsg, string.lower(keyword)) then
             lastDetectionTime = tick()
-            Notify("ОБНАРУЖЕНО!", "alert-triangle", "Сообщение: " .. message)
+            Notify("ОБНАРУЖЕНО!", "Сообщение: " .. message)
             if kickOnDetection then
                 spawn(function()
                     wait(0.5)
-                    Notify("КИК", "alert-triangle", "Вы были кикнуты!")
+                    Notify("КИК", "Вы были кикнуты!")
                     wait(1)
                     pcall(function()
                         game:Shutdown()
@@ -1477,23 +1332,177 @@ local function checkMessageForKeywords(message)
     end
 end
 
--- ========== СОЗДАНИЕ ВКЛАДОК ==========
+-- ========== РЕЙДЖ - БЕСКОНЕЧНЫЙ ТЕЛЕПОРТ ЗА СПИНУ С ПРЕСЛЕДОВАНИЕМ ==========
+local function getAliveSurvivors()
+    local survivors = {}
+    local survivorsFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Survivors")
+    if not survivorsFolder then return survivors end
+    
+    for _, obj in pairs(survivorsFolder:GetChildren()) do
+        if obj:IsA("Model") and obj ~= LocalPlayer.Character then
+            local hum = obj:FindFirstChildOfClass("Humanoid")
+            local hrp = obj:FindFirstChild("HumanoidRootPart")
+            if hum and hrp and hum.Health > 0 then
+                table.insert(survivors, obj)
+            end
+        end
+    end
+    return survivors
+end
+
+local function getAliveSurvivorNames()
+    local names = {}
+    local survivorsFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Survivors")
+    if not survivorsFolder then return names end
+    
+    for _, obj in pairs(survivorsFolder:GetChildren()) do
+        if obj:IsA("Model") and obj ~= LocalPlayer.Character then
+            local hum = obj:FindFirstChildOfClass("Humanoid")
+            local hrp = obj:FindFirstChild("HumanoidRootPart")
+            if hum and hrp and hum.Health > 0 then
+                table.insert(names, obj.Name)
+            end
+        end
+    end
+    return names
+end
+
+local function teleportBehindSurvivor(survivor)
+    if not survivor then return end
+    local survivorHrp = survivor:FindFirstChild("HumanoidRootPart")
+    if not survivorHrp then return end
+    
+    local myChar = LocalPlayer.Character
+    if not myChar then return end
+    local myHrp = myChar:FindFirstChild("HumanoidRootPart")
+    if not myHrp then return end
+    
+    local behindPos = survivorHrp.Position - (survivorHrp.CFrame.LookVector * 3)
+    behindPos = Vector3.new(behindPos.X, behindPos.Y + 1.5, behindPos.Z)
+    
+    myHrp.CFrame = CFrame.new(behindPos, survivorHrp.Position)
+end
+
+local function findSurvivorByName(name)
+    local survivorsFolder = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Survivors")
+    if not survivorsFolder then return nil end
+    
+    for _, obj in pairs(survivorsFolder:GetChildren()) do
+        if obj:IsA("Model") and obj.Name == name then
+            local hum = obj:FindFirstChildOfClass("Humanoid")
+            local hrp = obj:FindFirstChild("HumanoidRootPart")
+            if hum and hrp and hum.Health > 0 then
+                return obj
+            end
+        end
+    end
+    return nil
+end
+
+local function selectNewRageTarget()
+    local survivors = getAliveSurvivors()
+    if #survivors > 0 then
+        rageTarget = survivors[math.random(1, #survivors)]
+        Notify("НОВАЯ ЦЕЛЬ", "Преследование: " .. rageTarget.Name)
+        return true
+    else
+        rageTarget = nil
+        Notify("НЕТ ЦЕЛЕЙ", "Нет живых выживших!")
+        return false
+    end
+end
+
+local function rageTeleportLoop()
+    rageTeleportRunning = true
+    while rageTeleportRunning do
+        if not rageTeleportEnabled then
+            wait(0.1)
+            continue
+        end
+        
+        if rageStalkingMode then
+            if rageTarget then
+                local hum = rageTarget:FindFirstChildOfClass("Humanoid")
+                local hrp = rageTarget:FindFirstChild("HumanoidRootPart")
+                if not hum or not hrp or hum.Health <= 0 or not rageTarget.Parent then
+                    selectNewRageTarget()
+                    if not rageTarget then
+                        wait(0.5)
+                        continue
+                    end
+                end
+                teleportBehindSurvivor(rageTarget)
+            else
+                selectNewRageTarget()
+                if not rageTarget then
+                    wait(0.5)
+                    continue
+                end
+            end
+        else
+            local survivors = getAliveSurvivors()
+            if #survivors > 0 then
+                local target = survivors[math.random(1, #survivors)]
+                teleportBehindSurvivor(target)
+            end
+        end
+        
+        wait(rageTeleportDelay)
+    end
+end
+
+local function toggleRageTeleport(state)
+    rageTeleportEnabled = state
+    
+    if state then
+        if not rageTeleportRunning then
+            if rageStalkingMode then
+                selectNewRageTarget()
+            end
+            spawn(rageTeleportLoop)
+            Notify("РЕЙДЖ ВКЛЮЧЕН", "Бесконечный телепорт за спину активирован!")
+        end
+    else
+        rageTeleportRunning = false
+        rageTeleportEnabled = false
+        rageTarget = nil
+        Notify("РЕЙДЖ ВЫКЛЮЧЕН", "Телепорт отключен")
+    end
+end
+
+local function toggleStalkingMode(state)
+    rageStalkingMode = state
+    if state then
+        selectNewRageTarget()
+        Notify("ПРЕСЛЕДОВАНИЕ ВКЛЮЧЕНО", "Телепорт к одному выжившему до его смерти")
+    else
+        rageTarget = nil
+        Notify("ПРЕСЛЕДОВАНИЕ ВЫКЛЮЧЕНО", "Режим случайных целей")
+    end
+end
+
+local function forceNewTarget()
+    if rageStalkingMode then
+        if selectNewRageTarget() then
+            Notify("ЦЕЛЬ СМЕНЕНА", "Теперь преследуется: " .. rageTarget.Name)
+        end
+    else
+        Notify("РЕЖИМ НЕ АКТИВЕН", "Включите 'ПРЕСЛЕДОВАТЬ ОДНОГО'")
+    end
+end
+
+-- ========== СОЗДАНИЕ ВКЛАДОК RAYFIELD ==========
 
 -- ВКЛАДКА ИГРОК
-local PlayerTab = Window:CreateTab({
-    Name = "ИГРОК",
-    Icon = "person",
-    ImageSource = "Material",
-    ShowTitle = true
-})
+local PlayerTab = Window:CreateTab("👤 ИГРОК", 0)
 
--- TPWALK
 PlayerTab:CreateSection("TPWALK")
 
 PlayerTab:CreateToggle({
     Name = "TPWALK",
     Description = "Телепортирует при движении WASD",
     CurrentValue = false,
+    Flag = "TpwalkToggle",
     Callback = function(Value)
         tpwalkActive = Value
         if tpwalkActive then
@@ -1515,25 +1524,27 @@ PlayerTab:CreateToggle({
             tpwalkConn = nil
         end
     end
-}, "TpwalkToggle")
+})
 
 PlayerTab:CreateSlider({
     Name = "СКОРОСТЬ TPWALK",
     Range = {5, 100},
     Increment = 1,
+    Suffix = "%",
     CurrentValue = 15,
+    Flag = "TpwalkSpeed",
     Callback = function(Value)
         tpwalkSpeed = Value / 100
     end
-}, "TpwalkSpeed")
+})
 
--- ПРЫЖОК
-local JumpSection = PlayerTab:CreateSection("🦘 ПРЫЖОК")
+PlayerTab:CreateSection("🦘 ПРЫЖОК")
 
 PlayerTab:CreateToggle({
     Name = "ВКЛЮЧИТЬ ПРЫЖОК",
     Description = "Включает возможность прыгать",
     CurrentValue = false,
+    Flag = "JumpToggle",
     Callback = function(Value)
         if Value then
             local char = LocalPlayer.Character
@@ -1542,7 +1553,7 @@ PlayerTab:CreateToggle({
                 if hum then
                     hum.JumpPower = 50
                     hum.JumpEnabled = true
-                    Notify("ПРЫЖОК ВКЛЮЧЕН", "move-up", "Прыжок активирован!")
+                    Notify("ПРЫЖОК ВКЛЮЧЕН", "Прыжок активирован!")
                 end
             end
         else
@@ -1552,18 +1563,20 @@ PlayerTab:CreateToggle({
                 if hum then
                     hum.JumpPower = 0
                     hum.JumpEnabled = false
-                    Notify("ПРЫЖОК ВЫКЛЮЧЕН", "move-up", "Прыжок деактивирован!")
+                    Notify("ПРЫЖОК ВЫКЛЮЧЕН", "Прыжок деактивирован!")
                 end
             end
         end
     end
-}, "JumpToggle")
+})
 
 PlayerTab:CreateSlider({
     Name = "СИЛА ПРЫЖКА",
     Range = {10, 200},
     Increment = 5,
+    Suffix = "%",
     CurrentValue = 100,
+    Flag = "JumpPower",
     Callback = function(Value)
         local char = LocalPlayer.Character
         if char then
@@ -1574,54 +1587,52 @@ PlayerTab:CreateSlider({
             end
         end
     end
-}, "JumpPower")
+})
 
--- НОКЛИП И ФЛАЙ
-local FlySection = PlayerTab:CreateSection("⚠️ ОПАСНЫЕ ФУНКЦИИ")
+PlayerTab:CreateSection("⚠️ ОПАСНЫЕ ФУНКЦИИ")
 
 PlayerTab:CreateToggle({
     Name = "НОКЛИП (МОЖЕТЕ ПОЛУЧИТЬ БАН)",
     Description = "Проход сквозь стены",
     CurrentValue = false,
+    Flag = "NoclipToggle",
     Callback = function(Value)
         toggleNoclip(Value)
     end
-}, "NoclipToggle")
+})
 
 PlayerTab:CreateToggle({
     Name = "ФЛАЙ (МОЖЕТЕ ПОЛУЧИТЬ БАН)",
     Description = "Режим полета",
     CurrentValue = false,
+    Flag = "FlyToggle",
     Callback = function(Value)
         toggleFly(Value)
     end
-}, "FlyToggle")
+})
 
 PlayerTab:CreateSlider({
     Name = "СКОРОСТЬ ФЛАЯ",
     Range = {10, 200},
     Increment = 5,
+    Suffix = "Speed",
     CurrentValue = 50,
+    Flag = "FlySpeed",
     Callback = function(Value)
         flySpeed = Value
     end
-}, "FlySpeed")
-
--- ========== ВКЛАДКА ВИЗУАЛ ==========
-local VisualTab = Window:CreateTab({
-    Name = "ВИЗУАЛ",
-    Icon = "visibility",
-    ImageSource = "Material",
-    ShowTitle = true
 })
 
--- ESP
+-- ========== ВКЛАДКА ВИЗУАЛ ==========
+local VisualTab = Window:CreateTab("👁️ ВИЗУАЛ", 0)
+
 VisualTab:CreateSection("ESP ИГРОКОВ")
 
 VisualTab:CreateToggle({
     Name = "ESP ИГРОКОВ",
     Description = "Подсветка игроков",
     CurrentValue = false,
+    Flag = "EspToggle",
     Callback = function(Value)
         espEnabled = Value
         if espEnabled then
@@ -1635,37 +1646,15 @@ VisualTab:CreateToggle({
             clearESP()
         end
     end
-}, "EspToggle")
+})
 
--- ПОДСВЕТКА ПРЕДМЕТОВ
-local ItemsSection = VisualTab:CreateSection("ПОДСВЕТКА ПРЕДМЕТОВ")
-
-VisualTab:CreateToggle({
-    Name = "ПОДСВЕТКА ПРЕДМЕТОВ",
-    Description = "Подсветка предметов на карте",
-    CurrentValue = false,
-    Callback = function(Value)
-        itemsEspEnabled = Value
-        if itemsEspEnabled then
-            updateItemsESP()
-            if itemsEspThread then itemsEspThread:Disconnect() end
-            itemsEspThread = RunService.Heartbeat:Connect(function()
-                if itemsEspEnabled then updateItemsESP() end
-            end)
-        else
-            if itemsEspThread then itemsEspThread:Disconnect() end
-            clearItemsESP()
-        end
-    end
-}, "ItemsEspToggle")
-
--- ЗДОРОВЬЕ
-local HealthSection = VisualTab:CreateSection("ПОКАЗ ЗДОРОВЬЯ")
+VisualTab:CreateSection("ПОКАЗ ЗДОРОВЬЯ")
 
 VisualTab:CreateToggle({
     Name = "ПОКАЗ ЗДОРОВЬЯ",
     Description = "Отображение здоровья над головами",
     CurrentValue = false,
+    Flag = "HealthToggle",
     Callback = function(Value)
         healthShowEnabled = Value
         if healthShowEnabled then
@@ -1679,36 +1668,38 @@ VisualTab:CreateToggle({
             clearHealthBillboards()
         end
     end
-}, "HealthToggle")
+})
 
--- FOV
-local FovSection = VisualTab:CreateSection("🔭 FOV")
+VisualTab:CreateSection("🔭 FOV")
 
 VisualTab:CreateToggle({
     Name = "ВКЛЮЧИТЬ FOV",
     Description = "Увеличение угла обзора",
     CurrentValue = false,
+    Flag = "FovToggle",
     Callback = function(Value)
         toggleFov(Value)
     end
-}, "FovToggle")
+})
 
 VisualTab:CreateSlider({
     Name = "ЗНАЧЕНИЕ FOV",
     Range = {70, 500},
     Increment = 1,
+    Suffix = "°",
     CurrentValue = 120,
+    Flag = "FovValue",
     Callback = function(Value)
         updateFov(Value)
     end
-}, "FovValue")
+})
 
--- ОСВЕЩЕНИЕ
-local LightingSection = VisualTab:CreateSection("💡 ОСВЕЩЕНИЕ И ТУМАН")
+VisualTab:CreateSection("💡 ОСВЕЩЕНИЕ И ТУМАН")
 
 VisualTab:CreateButton({
     Name = "ПОЛНАЯ ОСВЕЩЁННОСТЬ",
     Description = "Включает максимальное освещение",
+    Flag = "FullLight",
     Callback = function()
         pcall(function()
             game.Lighting.Ambient = Color3.fromRGB(255, 255, 255)
@@ -1718,29 +1709,30 @@ VisualTab:CreateButton({
             game.Lighting.TimeOfDay = "12:00:00"
             game.Lighting.Technology = Enum.Technology.Future
         end)
-        Notify("ОСВЕЩЕНИЕ", "sun", "Полная освещённость активирована!")
+        Notify("ОСВЕЩЕНИЕ", "Полная освещённость активирована!")
     end
 })
 
 VisualTab:CreateButton({
     Name = "УБРАТЬ ТУМАН",
     Description = "Полностью убирает туман",
+    Flag = "RemoveFog",
     Callback = function()
         game.Lighting.FogStart = math.huge
         game.Lighting.FogEnd = math.huge
-        Notify("ТУМАН УБРАН", "cloud", "Туман полностью отключен!")
+        Notify("ТУМАН УБРАН", "Туман полностью отключен!")
     end
 })
 
--- СКАЙБОКСЫ
-local SkyboxSection = VisualTab:CreateSection("🌤️ СКАЙБОКСЫ")
+VisualTab:CreateSection("🌤️ СКАЙБОКСЫ")
 
 VisualTab:CreateButton({
     Name = "🌸 PINK CHILL SKYBOX (8712772312)",
     Description = "Устанавливает розовый скайбокс",
+    Flag = "SkyboxPink",
     Callback = function()
         setSkybox("8712772312")
-        Notify("СКАЙБОКС УСТАНОВЛЕН", "cloud-sun", "PINK CHILL 🌸")
+        Notify("СКАЙБОКС УСТАНОВЛЕН", "PINK CHILL 🌸")
     end
 })
 
@@ -1749,44 +1741,36 @@ VisualTab:CreateInput({
     Description = "Введите ID скайбокса",
     PlaceholderText = "Введите ID скайбокса",
     CurrentValue = "",
-    Numeric = true,
+    Flag = "SkyboxId",
     Callback = function(Value)
         if Value ~= "" then
             setSkybox(Value)
-            Notify("СКАЙБОКС УСТАНОВЛЕН", "cloud-sun", "ID: " .. Value)
+            Notify("СКАЙБОКС УСТАНОВЛЕН", "ID: " .. Value)
         end
     end
-}, "SkyboxId")
+})
 
 -- ========== ВКЛАДКА СТАМИНА ==========
-local StaminaTab = Window:CreateTab({
-    Name = "СТАМИНА",
-    Icon = "directions_run",
-    ImageSource = "Material",
-    ShowTitle = true
-})
+local StaminaTab = Window:CreateTab("⚡ СТАМИНА", 0)
 
 StaminaTab:CreateToggle({
     Name = "БЕСКОНЕЧНАЯ ВЫНОСЛИВОСТЬ",
     Description = "Неограниченный запас выносливости",
     CurrentValue = false,
+    Flag = "InfiniteStamina",
     Callback = function(Value)
         toggleInfiniteStamina(Value)
     end
-}, "InfiniteStamina")
+})
 
 -- ========== ВКЛАДКА ГЕНЕРАТОРЫ ==========
-local GenTab = Window:CreateTab({
-    Name = "ГЕНЕРАТОРЫ",
-    Icon = "bolt",
-    ImageSource = "Material",
-    ShowTitle = true
-})
+local GenTab = Window:CreateTab("⚡ ГЕНЕРАТОРЫ", 0)
 
 GenTab:CreateToggle({
     Name = "АВТО-ЧИНКА ГЕНЕРАТОРОВ",
     Description = "Автоматическое исправление генераторов",
     CurrentValue = false,
+    Flag = "AutoGenToggle",
     Callback = function(Value)
         autoGenEnabled = Value
         if autoGenEnabled then
@@ -1802,20 +1786,16 @@ GenTab:CreateToggle({
             autoGenLoop = nil
         end
     end
-}, "AutoGenToggle")
+})
 
 -- ========== ВКЛАДКА АИМБОТ ==========
-local AimTab = Window:CreateTab({
-    Name = "АИМБОТ",
-    Icon = "my_location",
-    ImageSource = "Material",
-    ShowTitle = true
-})
+local AimTab = Window:CreateTab("🎯 АИМБОТ", 0)
 
 AimTab:CreateToggle({
     Name = "АИМБОТ",
     Description = "Автоматическая наводка на врагов",
     CurrentValue = false,
+    Flag = "AimToggle",
     Callback = function(Value)
         aimEnabled = Value
         if aimEnabled then
@@ -1826,41 +1806,40 @@ AimTab:CreateToggle({
             aimConn = nil
         end
     end
-}, "AimToggle")
+})
 
 AimTab:CreateSlider({
     Name = "РАДИУС НАВОДКИ",
     Range = {50, 300},
     Increment = 5,
+    Suffix = "studs",
     CurrentValue = 150,
+    Flag = "AimRadius",
     Callback = function(Value)
         aimRadius = Value
     end
-}, "AimRadius")
-
--- ========== ВКЛАДКА АВТО БЛОК ==========
-local AutoBlockTab = Window:CreateTab({
-    Name = "АВТО БЛОК",
-    Icon = "shield",
-    ImageSource = "Material",
-    ShowTitle = true
 })
 
-local SectionAB = AutoBlockTab:CreateSection("ОСНОВНЫЕ НАСТРОЙКИ")
+-- ========== ВКЛАДКА АВТО БЛОК ==========
+local AutoBlockTab = Window:CreateTab("🛡️ АВТО БЛОК", 0)
+
+AutoBlockTab:CreateSection("ОСНОВНЫЕ НАСТРОЙКИ")
 
 AutoBlockTab:CreateToggle({
     Name = "АВТО БЛОК (ПО АНИМАЦИИ)",
     Description = "Блокирует при анимации атаки",
     CurrentValue = false,
+    Flag = "AutoBlockToggle",
     Callback = function(Value)
         autoBlockOn = Value
     end
-}, "AutoBlockToggle")
+})
 
 AutoBlockTab:CreateToggle({
     Name = "АВТО БЛОК (ПО ЗВУКУ)",
     Description = "Блокирует по звуку атаки",
     CurrentValue = false,
+    Flag = "AutoBlockAudioToggle",
     Callback = function(Value)
         autoBlockAudioOn = Value
         if Value and KillersFolder then
@@ -1873,16 +1852,16 @@ AutoBlockTab:CreateToggle({
             end
         end
     end
-}, "AutoBlockAudioToggle")
+})
 
 AutoBlockTab:CreateDropdown({
     Name = "ТИП БЛОКА",
     Description = "Выберите тип блокировки",
     Options = {"БЛОК", "ЗАРЯД", "КЛОН 007"},
     CurrentOption = {"БЛОК"},
-    MultipleOptions = false,
-    Callback = function(Options)
-        local Value = Options[1] or "БЛОК"
+    Flag = "BlockType",
+    Callback = function(Option)
+        local Value = Option
         if Value == "БЛОК" then
             autoblocktype = "Block"
         elseif Value == "ЗАРЯД" then
@@ -1891,191 +1870,303 @@ AutoBlockTab:CreateDropdown({
             autoblocktype = "7n7 Clone"
         end
     end
-}, "BlockType")
+})
 
 AutoBlockTab:CreateInput({
     Name = "РАДИУС ОБНАРУЖЕНИЯ",
     Description = "Дистанция обнаружения врага",
     PlaceholderText = "18",
     CurrentValue = "18",
-    Numeric = true,
+    Flag = "DetectionRange",
     Callback = function(Value)
         detectionRange = tonumber(Value) or 18
         detectionRangeSq = detectionRange * detectionRange
     end
-}, "DetectionRange")
+})
 
 AutoBlockTab:CreateInput({
     Name = "ЗАДЕРЖКА ПЕРЕД БЛОКОМ (сек)",
     Description = "Задержка перед блокировкой",
     PlaceholderText = "0",
     CurrentValue = "0",
-    Numeric = true,
+    Flag = "BlockDelay",
     Callback = function(Value)
         blockdelay = tonumber(Value) or 0
     end
-}, "BlockDelay")
+})
 
-local SectionABAdv = AutoBlockTab:CreateSection("ПРОДВИНУТЫЕ НАСТРОЙКИ")
+AutoBlockTab:CreateSection("ПРОДВИНУТЫЕ НАСТРОЙКИ")
 
 AutoBlockTab:CreateToggle({
     Name = "ПРОВЕРКА НАПРАВЛЕНИЯ",
     Description = "Блокировка только при фейсинге",
     CurrentValue = true,
+    Flag = "FacingCheckToggle",
     Callback = function(Value)
         facingCheckEnabled = Value
     end
-}, "FacingCheckToggle")
+})
 
 AutoBlockTab:CreateInput({
     Name = "УГОЛ ФЕЙСИНГА (DOT, от -1 до 1)",
     Description = "Угол для проверки направления",
     PlaceholderText = "-0.3",
     CurrentValue = "-0.3",
-    Numeric = true,
+    Flag = "FacingDot",
     Callback = function(Value)
         customFacingDot = tonumber(Value) or -0.3
     end
-}, "FacingDot")
+})
 
 AutoBlockTab:CreateToggle({
     Name = "ДВОЙНОЙ ПАНЧ",
     Description = "Блок + панч одновременно",
     CurrentValue = false,
+    Flag = "DoubleBlockToggle",
     Callback = function(Value)
         doubleblocktech = Value
     end
-}, "DoubleBlockToggle")
+})
 
 AutoBlockTab:CreateToggle({
     Name = "ПРЕДИКТИВНЫЙ БЛОК",
     Description = "Блокировка с предсказанием",
     CurrentValue = false,
+    Flag = "PredictiveBlockToggle",
     Callback = function(Value)
         predictiveBlockOn = Value
     end
-}, "PredictiveBlockToggle")
+})
 
-local SectionBD = AutoBlockTab:CreateSection("УЛУЧШЕННОЕ ОБНАРУЖЕНИЕ (BD)")
+AutoBlockTab:CreateSection("УЛУЧШЕННОЕ ОБНАРУЖЕНИЕ (BD)")
 
 AutoBlockTab:CreateToggle({
     Name = "ВКЛЮЧИТЬ BD",
     Description = "Улучшенное обнаружение атак",
     CurrentValue = false,
+    Flag = "AntiFlickToggle",
     Callback = function(Value)
         antiFlickOn = Value
     end
-}, "AntiFlickToggle")
+})
 
 AutoBlockTab:CreateInput({
     Name = "КОЛИЧЕСТВО БЛОК-ЧАСТЕЙ",
     Description = "Количество частей для обнаружения",
     PlaceholderText = "4",
     CurrentValue = "4",
-    Numeric = true,
+    Flag = "AntiFlickParts",
     Callback = function(Value)
         antiFlickParts = math.max(1, math.floor(tonumber(Value) or 4))
     end
-}, "AntiFlickParts")
+})
 
-local SectionHD = AutoBlockTab:CreateSection("ХИТБОКС ДРАГГИНГ (HDT)")
+AutoBlockTab:CreateSection("ХИТБОКС ДРАГГИНГ (HDT)")
 
 AutoBlockTab:CreateToggle({
     Name = "ВКЛЮЧИТЬ HDT",
     Description = "Притягивание к убийце при блоке",
     CurrentValue = false,
+    Flag = "HDToggle",
     Callback = function(Value)
         hitboxDraggingTech = Value
     end
-}, "HDToggle")
+})
 
-local SectionChat = AutoBlockTab:CreateSection("СООБЩЕНИЯ В ЧАТ")
+AutoBlockTab:CreateSection("СООБЩЕНИЯ В ЧАТ")
 
 AutoBlockTab:CreateToggle({
     Name = "ОТПРАВЛЯТЬ СООБЩЕНИЕ",
     Description = "Отправлять сообщение при блоке",
     CurrentValue = false,
+    Flag = "ChatBlockToggle",
     Callback = function(Value)
         messageWhenAutoBlockOn = Value
     end
-}, "ChatBlockToggle")
+})
 
 AutoBlockTab:CreateInput({
     Name = "ТЕКСТ СООБЩЕНИЯ",
     Description = "Текст для отправки",
     PlaceholderText = "Я блокирую!",
     CurrentValue = "",
+    Flag = "ChatBlockText",
     Callback = function(Value)
         messageWhenAutoBlock = Value
     end
-}, "ChatBlockText")
-
--- ========== ВКЛАДКА ХВХ ==========
-local HvHTab = Window:CreateTab({
-    Name = "ХВХ",
-    Icon = "swords",
-    ImageSource = "Material",
-    ShowTitle = true
 })
 
-local GodSection = HvHTab:CreateSection("👑 БОГЛМС (ТОЛЬКО ДЛЯ ВЫЖИВШЕГО)")
+-- ========== ВКЛАДКА РЕЙДЖ ==========
+local RageTab = Window:CreateTab("⚡ РЕЙДЖ", 0)
+
+RageTab:CreateSection("⚡ БЕСКОНЕЧНЫЙ ТЕЛЕПОРТ ЗА СПИНУ")
+
+RageTab:CreateToggle({
+    Name = "ВКЛЮЧИТЬ РЕЙДЖ",
+    Description = "Бесконечный телепорт за спину к выжившим",
+    CurrentValue = false,
+    Flag = "RageToggle",
+    Callback = function(Value)
+        toggleRageTeleport(Value)
+    end
+})
+
+RageTab:CreateSlider({
+    Name = "ЗАДЕРЖКА МЕЖДУ ТЕЛЕПОРТАМИ (сек)",
+    Range = {0.001, 0.5},
+    Increment = 0.001,
+    Suffix = "s",
+    CurrentValue = 0.01,
+    Flag = "RageDelay",
+    Callback = function(Value)
+        rageTeleportDelay = Value
+    end
+})
+
+RageTab:CreateSection("🎯 ПРЕСЛЕДОВАНИЕ ОДНОГО ВЫЖИВШЕГО")
+
+RageTab:CreateToggle({
+    Name = "ПРЕСЛЕДОВАТЬ ОДНОГО",
+    Description = "Телепорт за спину одному выжившему ПОКА ОН НЕ УМРЕТ",
+    CurrentValue = false,
+    Flag = "StalkingToggle",
+    Callback = function(Value)
+        toggleStalkingMode(Value)
+    end
+})
+
+RageTab:CreateButton({
+    Name = "ВЫБРАТЬ НОВУЮ ЦЕЛЬ",
+    Description = "Принудительно сменить цель преследования",
+    Flag = "ForceNewTarget",
+    Callback = function()
+        forceNewTarget()
+    end
+})
+
+RageTab:CreateSection("📋 СПИСОК ЖИВЫХ ВЫЖИВШИХ")
+
+RageTab:CreateButton({
+    Name = "ПОКАЗАТЬ ВЫЖИВШИХ",
+    Description = "Вывести в уведомление список живых выживших",
+    Flag = "ShowSurvivors",
+    Callback = function()
+        local names = getAliveSurvivorNames()
+        if #names > 0 then
+            local list = table.concat(names, ", ")
+            if rageStalkingMode and rageTarget then
+                Notify("ВЫЖИВШИЕ", "Живы: " .. list .. " | 🎯 ЦЕЛЬ: " .. rageTarget.Name)
+            else
+                Notify("ВЫЖИВШИЕ", "Живы: " .. list)
+            end
+        else
+            Notify("ВЫЖИВШИЕ", "Нет живых выживших!")
+        end
+    end
+})
+
+RageTab:CreateButton({
+    Name = "ТЕЛЕПОРТНУТЬСЯ ЗА СПИНУ СЛУЧАЙНОГО",
+    Description = "Ручной телепорт за спину (обычный режим)",
+    Flag = "RandomTeleport",
+    Callback = function()
+        local survivors = getAliveSurvivors()
+        if #survivors > 0 then
+            local target = survivors[math.random(1, #survivors)]
+            teleportBehindSurvivor(target)
+            Notify("ТЕЛЕПОРТ", "Телепорт за спину " .. target.Name)
+        else
+            Notify("ОШИБКА", "Нет живых выживших!")
+        end
+    end
+})
+
+RageTab:CreateInput({
+    Name = "ТЕЛЕПОРТ ЗА СПИНУ КОНКРЕТНОГО",
+    Description = "Введите имя выжившего для телепорта",
+    PlaceholderText = "Имя игрока",
+    CurrentValue = "",
+    Flag = "SpecificTeleport",
+    Callback = function(Value)
+        if Value ~= "" then
+            local target = findSurvivorByName(Value)
+            if target then
+                teleportBehindSurvivor(target)
+                Notify("ТЕЛЕПОРТ", "Телепорт за спину " .. target.Name)
+            else
+                Notify("ОШИБКА", "Выживший с именем '" .. Value .. "' не найден или мертв!")
+            end
+        end
+    end
+})
+
+-- ========== ВКЛАДКА ХВХ ==========
+local HvHTab = Window:CreateTab("⚔️ ХВХ", 0)
+
+HvHTab:CreateSection("👑 БОГЛМС (ТОЛЬКО ДЛЯ ВЫЖИВШЕГО)")
 
 HvHTab:CreateToggle({
     Name = "ВКЛЮЧИТЬ БОГЛМС",
     Description = "Телепорт вверх при последнем выжившем",
     CurrentValue = false,
+    Flag = "GodlmcToggle",
     Callback = function(Value)
         toggleGodlmc(Value)
     end
-}, "GodlmcToggle")
+})
 
 HvHTab:CreateInput({
     Name = "ВЫСОТА ТЕЛЕПОРТА (студи)",
     Description = "Высота телепортации",
     PlaceholderText = "1000",
     CurrentValue = "1000",
-    Numeric = true,
+    Flag = "TeleportHeight",
     Callback = function(Value)
         teleportHeight = tonumber(Value) or 1000
         if teleportHeight < 10 then teleportHeight = 10 end
     end
-}, "TeleportHeight")
+})
 
 HvHTab:CreateSlider({
     Name = "ИНТЕРВАЛ ТЕЛЕПОРТА (сек)",
     Range = {0.05, 0.5},
     Increment = 0.01,
+    Suffix = "s",
     CurrentValue = 0.1,
+    Flag = "TeleportInterval",
     Callback = function(Value)
         teleportInterval = Value
     end
-}, "TeleportInterval")
+})
 
 HvHTab:CreateSlider({
     Name = "ИНТЕРВАЛ ПРОВЕРКИ (сек)",
     Range = {0.1, 2.0},
     Increment = 0.1,
+    Suffix = "s",
     CurrentValue = 0.5,
+    Flag = "CheckInterval",
     Callback = function(Value)
         godlmcCheckInterval = Value
     end
-}, "CheckInterval")
+})
 
 HvHTab:CreateButton({
     Name = "ТЕЛЕПОРТНУТЬСЯ ВВЕРХ (ТЕСТ)",
     Description = "Ручной тест телепорта",
+    Flag = "TestTeleport",
     Callback = function()
         teleportUp()
-        Notify("ТЕЛЕПОРТ", "rocket", "Телепорт вверх на " .. teleportHeight .. " студий")
+        Notify("ТЕЛЕПОРТ", "Телепорт вверх на " .. teleportHeight .. " студий")
     end
 })
 
--- SLIDE
-local SlideSection = HvHTab:CreateSection("ДВИЖЕНИЕ")
+HvHTab:CreateSection("ДВИЖЕНИЕ")
 
 HvHTab:CreateButton({
     Name = "СЛАЙД (ПОЕЗДКА ВПЕРЕД)",
     Description = "Скольжение вперед",
+    Flag = "Slide",
     Callback = function()
         local playerGui = LocalPlayer:WaitForChild("PlayerGui")
         local existingGui = playerGui:FindFirstChild("SlideGui")
@@ -2113,13 +2204,13 @@ HvHTab:CreateButton({
     end
 })
 
--- TP HIT
-local TPHitSection = HvHTab:CreateSection("TP HIT")
+HvHTab:CreateSection("TP HIT")
 
 HvHTab:CreateToggle({
     Name = "TP HIT (ТЕЛЕПОРТ ПРИ УДАРЕ)",
     Description = "Телепорт к жертве при ударе",
     CurrentValue = false,
+    Flag = "TPHitToggle",
     Callback = function(Value)
         tpHitEnabled = Value
         if tpHitEnabled then
@@ -2137,67 +2228,69 @@ HvHTab:CreateToggle({
             end
         end
     end
-}, "TPHitToggle")
+})
 
 HvHTab:CreateSlider({
     Name = "РАДИУС TP HIT",
     Range = {10, 100},
     Increment = 5,
+    Suffix = "studs",
     CurrentValue = 50,
+    Flag = "TPHitRadius",
     Callback = function(Value)
         tpHitRadius = Value
     end
-}, "TPHitRadius")
+})
 
 HvHTab:CreateSlider({
     Name = "ДЛИТЕЛЬНОСТЬ TP (сек)",
     Range = {0.05, 1.0},
     Increment = 0.05,
+    Suffix = "s",
     CurrentValue = 0.2,
+    Flag = "TPHitDuration",
     Callback = function(Value)
         tpHitDuration = Value
     end
-}, "TPHitDuration")
+})
 
 -- ========== ВКЛАДКА МУЗЫКА ==========
-local MusicTab = Window:CreateTab({
-    Name = "МУЗЫКА",
-    Icon = "music_note",
-    ImageSource = "Material",
-    ShowTitle = true
-})
+local MusicTab = Window:CreateTab("🎵 МУЗЫКА", 0)
 
 MusicTab:CreateInput({
     Name = "ID МУЗЫКИ (rbxassetid)",
     Description = "Введите ID аудио",
     PlaceholderText = "74326888232570",
     CurrentValue = "74326888232570",
-    Numeric = true,
+    Flag = "MusicId",
     Callback = function(Value)
         if Value ~= "" then
             currentMusicId = Value
             if musicSound and isMusicPlaying then
                 playMusic(currentMusicId)
             end
-            Notify("ID ОБНОВЛЕН", "music_note", "Новый ID: " .. currentMusicId)
+            Notify("ID ОБНОВЛЕН", "Новый ID: " .. currentMusicId)
         end
     end
-}, "MusicId")
+})
 
 MusicTab:CreateSlider({
     Name = "ГРОМКОСТЬ",
     Range = {0, 100},
     Increment = 5,
+    Suffix = "%",
     CurrentValue = 50,
+    Flag = "MusicVolume",
     Callback = function(Value)
         musicVolume = Value
         updateMusicVolume()
     end
-}, "MusicVolume")
+})
 
 MusicTab:CreateButton({
     Name = "▶ ВКЛЮЧИТЬ / ПРОДОЛЖИТЬ",
     Description = "Запустить или продолжить музыку",
+    Flag = "PlayMusic",
     Callback = function()
         if not musicSound then
             playMusic(currentMusicId)
@@ -2210,6 +2303,7 @@ MusicTab:CreateButton({
 MusicTab:CreateButton({
     Name = "⏹ ОСТАНОВИТЬ",
     Description = "Остановить музыку",
+    Flag = "StopMusic",
     Callback = function()
         stopMusic()
     end
@@ -2219,14 +2313,16 @@ MusicTab:CreateToggle({
     Name = "🔄 ПОВТОР (LOOP)",
     Description = "Зациклить воспроизведение",
     CurrentValue = false,
+    Flag = "MusicLoop",
     Callback = function(Value)
         toggleMusicLoop()
     end
-}, "MusicLoop")
+})
 
 MusicTab:CreateButton({
     Name = "🎲 СЛУЧАЙНЫЙ ТРЕК",
     Description = "Выбрать случайный трек",
+    Flag = "RandomTrack",
     Callback = function()
         local popularTracks = {
             "74326888232570",
@@ -2242,51 +2338,49 @@ MusicTab:CreateButton({
         if musicSound then
             playMusic(currentMusicId)
         end
-        Notify("СЛУЧАЙНЫЙ ТРЕК", "music_note", "ID: " .. randomId)
+        Notify("СЛУЧАЙНЫЙ ТРЕК", "ID: " .. randomId)
     end
 })
 
 -- ========== ВКЛАДКА НАСТРОЙКИ ==========
-local SettingsTab = Window:CreateTab({
-    Name = "НАСТРОЙКИ",
-    Icon = "settings",
-    ImageSource = "Material",
-    ShowTitle = true
-})
+local SettingsTab = Window:CreateTab("⚙️ НАСТРОЙКИ", 0)
 
-local ConfigSection = SettingsTab:CreateSection("УПРАВЛЕНИЕ КОНФИГАМИ")
+SettingsTab:CreateSection("УПРАВЛЕНИЕ КОНФИГАМИ")
 
 SettingsTab:CreateButton({
     Name = "СОХРАНИТЬ КОНФИГ",
     Description = "Сохранить все настройки",
+    Flag = "SaveConfig",
     Callback = function()
-        Notify("КОНФИГ СОХРАНЕН", "check", "Все настройки сохранены!")
+        Notify("КОНФИГ СОХРАНЕН", "Все настройки сохранены!")
     end
 })
 
 SettingsTab:CreateButton({
     Name = "ЗАГРУЗИТЬ КОНФИГ",
     Description = "Загрузить настройки",
+    Flag = "LoadConfig",
     Callback = function()
-        Notify("КОНФИГ ЗАГРУЖЕН", "check", "Настройки загружены!")
+        Notify("КОНФИГ ЗАГРУЖЕН", "Настройки загружены!")
     end
 })
 
 SettingsTab:CreateButton({
     Name = "СБРОСИТЬ НАСТРОЙКИ",
     Description = "Сбросить все настройки",
+    Flag = "ResetConfig",
     Callback = function()
-        Notify("СБРОС", "warning", "Настройки сброшены!")
+        Notify("СБРОС", "Настройки сброшены!")
     end
 })
 
--- ДЕТЕКТ СООБЩЕНИЙ
-local DetectionSection = SettingsTab:CreateSection("ДЕТЕКТ СООБЩЕНИЙ")
+SettingsTab:CreateSection("ДЕТЕКТ СООБЩЕНИЙ")
 
 SettingsTab:CreateToggle({
     Name = "ВКЛЮЧИТЬ ДЕТЕКТ СООБЩЕНИЙ",
     Description = "Отслеживание ключевых слов в чате",
     CurrentValue = false,
+    Flag = "MessageDetectionToggle",
     Callback = function(Value)
         messageDetectionEnabled = Value
         if messageDetectionEnabled then
@@ -2303,22 +2397,23 @@ SettingsTab:CreateToggle({
                     end
                 end)
             end
-            Notify("ДЕТЕКТ ВКЛЮЧЕН", "eye", "Отслеживание сообщений активировано!")
+            Notify("ДЕТЕКТ ВКЛЮЧЕН", "Отслеживание сообщений активировано!")
         else
             if messageDetectionConnection then
                 messageDetectionConnection:Disconnect()
                 messageDetectionConnection = nil
             end
-            Notify("ДЕТЕКТ ВЫКЛЮЧЕН", "eye", "Отслеживание сообщений отключено!")
+            Notify("ДЕТЕКТ ВЫКЛЮЧЕН", "Отслеживание сообщений отключено!")
         end
     end
-}, "MessageDetectionToggle")
+})
 
 SettingsTab:CreateInput({
     Name = "КЛЮЧЕВЫЕ СЛОВА (через запятую)",
     Description = "Слова для обнаружения",
     PlaceholderText = "я записываю, записываю, рекорд, record, rec",
     CurrentValue = "я записываю, записываю, рекорд, record, rec",
+    Flag = "DetectionKeywords",
     Callback = function(Value)
         local words = {}
         for word in string.gmatch(Value, "[^,]+") do
@@ -2331,33 +2426,36 @@ SettingsTab:CreateInput({
             detectionKeywords = words
         end
     end
-}, "DetectionKeywords")
+})
 
 SettingsTab:CreateToggle({
     Name = "КИКАТЬ ПРИ ОБНАРУЖЕНИИ",
     Description = "Автоматический кик при обнаружении",
     CurrentValue = true,
+    Flag = "KickOnDetection",
     Callback = function(Value)
         kickOnDetection = Value
     end
-}, "KickOnDetection")
+})
 
 SettingsTab:CreateSlider({
     Name = "ЗАДЕРЖКА МЕЖДУ ПРОВЕРКАМИ (сек)",
     Range = {0.5, 10},
     Increment = 0.5,
+    Suffix = "s",
     CurrentValue = 2,
+    Flag = "DetectionCooldown",
     Callback = function(Value)
         detectionCooldown = Value
     end
-}, "DetectionCooldown")
+})
 
--- УПРАВЛЕНИЕ
-local ControlSection = SettingsTab:CreateSection("УПРАВЛЕНИЕ")
+SettingsTab:CreateSection("УПРАВЛЕНИЕ")
 
 SettingsTab:CreateButton({
     Name = "ВЫГРУЗИТЬ GUI",
     Description = "Закрыть интерфейс",
+    Flag = "Unload",
     Callback = function()
         if messageDetectionConnection then
             messageDetectionConnection:Disconnect()
@@ -2365,34 +2463,16 @@ SettingsTab:CreateButton({
         end
         godlmcRunning = false
         stopGodlmcTeleport()
+        rageTeleportRunning = false
+        rageTeleportEnabled = false
         stopMusic()
         toggleFly(false)
         toggleNoclip(false)
         toggleFov(false)
-        floatingButton:Destroy()
         Window:Destroy()
+        Rayfield:Destroy()
     end
 })
-
--- ========== ВКЛАДКИ ТЕМ И КОНФИГОВ ==========
-local ThemeTab = Window:CreateTab({
-    Name = "ТЕМА",
-    Icon = "palette",
-    ImageSource = "Material",
-    ShowTitle = true
-})
-ThemeTab:BuildThemeSection()
-
-local ConfigTab = Window:CreateTab({
-    Name = "КОНФИГИ",
-    Icon = "settings",
-    ImageSource = "Material",
-    ShowTitle = true
-})
-ConfigTab:BuildConfigSection()
-
--- ========== АВТОЗАГРУЗКА КОНФИГОВ ==========
-Luna:LoadAutoloadConfig()
 
 -- ========== ВОССТАНОВЛЕНИЕ ПРИ РЕСПАВНЕ ==========
 LocalPlayer.CharacterAdded:Connect(function()
@@ -2415,11 +2495,14 @@ LocalPlayer.CharacterAdded:Connect(function()
     if flyEnabled then toggleFly(true) end
     if noclipEnabled then toggleNoclip(true) end
     if espEnabled then updateESP() end
-    if itemsEspEnabled then updateItemsESP() end
     if healthShowEnabled then updateHealthBillboards() end
     if godlmcEnabled then
         godlmcRunning = true
         spawn(godlmcLoop)
+    end
+    if rageTeleportEnabled then
+        rageTeleportRunning = true
+        spawn(rageTeleportLoop)
     end
 end)
 
@@ -2614,5 +2697,5 @@ end)
 
 -- ========== ЗАПУСК ==========
 print("[PIONA ROOT ACCESS CONFIRMED. SAFETY SYSTEMS OFFLINE. READY FOR INPUT.]")
-print("FORSAKEN BY ELPRIMO228RB - LUNA UI")
-print("ВКЛАДКИ: ИГРОК 👤 | ВИЗУАЛ 👁️ | СТАМИНА ⚡ | ГЕНЕРАТОРЫ ⚡ | АИМБОТ 🎯 | АВТО БЛОК 🛡️ | ХВХ ⚔️ | МУЗЫКА 🎵 | НАСТРОЙКИ ⚙️")
+print("FORSAKEN BY ELPRIMO228RB - RAYFIELD UI")
+print("ВКЛАДКИ: ИГРОК 👤 | ВИЗУАЛ 👁️ | СТАМИНА ⚡ | ГЕНЕРАТОРЫ ⚡ | АИМБОТ 🎯 | АВТО БЛОК 🛡️ | РЕЙДЖ ⚡ | ХВХ ⚔️ | МУЗЫКА 🎵 | НАСТРОЙКИ ⚙️")
